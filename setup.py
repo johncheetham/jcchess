@@ -8,14 +8,14 @@ import sys
 import string
 import shutil
 
-import gshogi.constants
+import jcchess.constants
 
 assert sys.version_info >= (3,0)
 
-VERSION = gshogi.constants.VERSION
+VERSION = jcchess.constants.VERSION
 
 if (sys.argv[1] == "install"):
-    if (not os.path.exists("gshogi/data/opening.bbk")):
+    if (not os.path.exists("jcchess/data/opening.bbk")):
         print("warning - opening book not found")
         print("you must run 'python setup.py build' first to build the " \
               "opening book")
@@ -39,8 +39,8 @@ else:
     macros.append(("HAVE_UNISTD_H", "1"))
     macros.append(("HASHFILE", "\"data/gnushogi.hsh\""))
     data_files=[
-      (sys.prefix+'/share/applications',['gshogi.desktop']),
-      (sys.prefix+'/share/pixmaps', ['gshogi.png'])]
+      (sys.prefix+'/share/applications',['jcchess.desktop']),
+      (sys.prefix+'/share/pixmaps', ['jcchess.png'])]
 
 package_data_list = ["data/opening.bbk"]
 
@@ -54,62 +54,41 @@ else:
         pth = os.path.join(localedir, d)
         if not os.path.isdir(pth):
             continue
-        filein = os.path.join(pth, "LC_MESSAGES", "gshogi.po")
-        pthout = os.path.join("gshogi", pth, "LC_MESSAGES")
+        filein = os.path.join(pth, "LC_MESSAGES", "jcchess.po")
+        pthout = os.path.join("jcchess", pth, "LC_MESSAGES")
         if not os.path.exists(pthout):
             try:
                 os.makedirs(pthout)
             except OSError as exc:
                 print("Unable to create locale folder", pthout)
                 sys.exit()
-        fileout = os.path.join(pthout, "gshogi.mo")
+        fileout = os.path.join(pthout, "jcchess.mo")
         os.popen("msgfmt %s -o %s" % (filein, fileout))
-        package_data_list.append(os.path.join(pth, "LC_MESSAGES", "gshogi.mo"))
-
-module1 = Extension("gshogi.engine", sources=[
-    "engine/enginemodule.c",
-    "engine/init.c",
-    "engine/globals.c",
-    "engine/eval.c",
-    "engine/search.c",
-    "engine/pattern.c",
-    "engine/book.c",
-    "engine/util.c",
-    "engine/commondsp.c",
-    "engine/genmove.c",
-    "engine/rawdsp.c",
-    "engine/attacks.c",
-    "engine/tcontrl.c",
-    "engine/sysdeps.c",
-    ],
-    define_macros=macros,
-)
-
+        package_data_list.append(os.path.join(pth, "LC_MESSAGES", "jcchess.mo"))
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-setup(name="gshogi",
+setup(name="jcchess",
       version=VERSION,
-      description="A Shogi Program (Japanese Chess)",
-      ext_modules=[module1],
+      description="A Chess GUI", 
       include_package_data=True,
       author="John Cheetham",
       author_email="developer@johncheetham.com",
-      url="http://www.johncheetham.com/projects/gshogi/",
+      url="http://www.johncheetham.com/projects/jcchess/",
       long_description=read("README.rst"),
       platforms=["Linux"],
       license="GPLv3+",
       zip_safe=False,
 
-      packages=["gshogi"],
+      packages=["jcchess"],
       package_data={
-          "gshogi": package_data_list,
+          "jcchess": package_data_list,
       },
       data_files=data_files,
       entry_points={
           "gui_scripts": [
-              "gshogi = gshogi.gshogi:run",
+              "jcchess = jcchess.jcchess:run",
           ]
       },
 
@@ -161,39 +140,5 @@ def get_plat():
 plat_name = get_plat()
 plat_specifier = ".%s-%s" % (plat_name, sys.version[0:3])
 build_lib = "lib" + plat_specifier
-pypath = os.path.join("build", build_lib, "gshogi")
+pypath = os.path.join("build", build_lib, "jcchess")
 sys.path.append(pypath)
-
-import engine
-
-text_opening_book = "data/gnushogi.tbk"
-bin_opening_book = "gshogi/data/opening.bbk"
-booksize = 8000
-bookmaxply = 40
-
-# check input file exists
-if (not os.path.exists(text_opening_book)):
-    print("Input file", text_opening_book, "not found")
-    sys.exit()
-
-# create data folder for bin book
-data_folder = os.path.dirname(bin_opening_book)
-if not os.path.exists(data_folder):
-    try:
-        os.makedirs(data_folder)
-    except OSError as exc:
-        print("Unable to create data folder", data_folder)
-        sys.exit()
-
-# delete the output file if it exists
-try:
-    os.remove(bin_opening_book)
-except OSError as oe:
-    pass
-
-# initialise the engine
-verbose = False
-engine.init(bin_opening_book, verbose)
-
-# call engine function to generate book file
-engine.genbook(text_opening_book, bin_opening_book, booksize, bookmaxply)
