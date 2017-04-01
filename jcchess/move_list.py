@@ -110,6 +110,7 @@ class Move_List:
         return
         # FIXME
         mvstr = engine.getmovelist()
+        #mvstr= -; ;P7g7f,-; ;P3c3d,-; ;P8g8f,-; ;P4c4d,-; ;P9g9f,-; ;B2b3c
         #
         
         moveno = 1
