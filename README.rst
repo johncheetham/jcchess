@@ -4,6 +4,10 @@ Description
 -----------
 JCchess is a program to play chess against UCI chess engines.
 
+Requirements
+------------
+python3 python-cairo python-gobject gtk3
+
 Usage
 -----
 Enter 'python3 run.py' to start the program.
