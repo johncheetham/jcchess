@@ -21,7 +21,7 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 import os
 import traceback
-import chess
+from . import chess
 
 
 class Pieces:

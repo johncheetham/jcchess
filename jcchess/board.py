@@ -24,7 +24,7 @@ from gi.repository import GdkPixbuf
 from gi.repository import GLib
 import cairo
 
-import chess
+from . import chess
 from . import gv
 from .constants import WHITE, BLACK
 

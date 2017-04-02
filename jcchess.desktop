@@ -1,11 +1,11 @@
 
 [Desktop Entry]
 Type=Application
-Name=gShogi
-Comment=gShogi is a Shogi (Japanese Chess) program for the Gnome desktop
-GenericName=Shogi Game
-Icon=gshogi.png
-Exec=gshogi
+Name=jcchess
+Comment=jcchess is a Chess GUI for the Gnome desktop
+GenericName=Chess Game
+Icon=jchess.png
+Exec=jcchess
 Terminal=false
 Categories=GNOME;Game;BoardGame;
 

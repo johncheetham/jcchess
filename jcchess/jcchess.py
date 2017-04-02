@@ -31,13 +31,12 @@ from gi.repository import GLib
 import _thread
 import traceback
 import os
-import gv
 import sys
 import pickle
 import time
 from datetime import date
 
-import chess
+from . import chess
 from . import gv
 from . import utils
 from . import gui
