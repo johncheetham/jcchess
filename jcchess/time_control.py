@@ -29,7 +29,7 @@ class Time_Control:
     def __init__(self):
 
         # time control defaults
-        self.type = 0
+        self.type = 2
 
         # byoyomi
         self.byo_hours = 0
@@ -41,8 +41,8 @@ class Time_Control:
 
         # incremental
         self.inc_hours = 0
-        self.inc_minutes = 45
-        self.inc_bonus = 6
+        self.inc_minutes = 5
+        self.inc_bonus = 0
 
         # fixed time per move
         self.ftpm_seconds = 5
