@@ -1009,15 +1009,16 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
 
     # set the base window size at startup
     def set_window_size(self):
-        if self.screen_width > 918 and self.screen_height > 724:
-            w = 918
+        print(self.screen_width,self.screen_height)
+        if self.screen_width > 575 and self.screen_height > 724:
+            w = 575
             h = 724
-        elif self.screen_width > 658 and self.screen_height > 523:
-            w = 658
+        elif self.screen_width > 415 and self.screen_height > 523:
+            w = 415
             h = 523
         else:
-            w = 511
-            h = 406
+            w = 322
+            h = 406 
         #w = 300
         #h = 300
         #self.window.set_default_size(w, h)
