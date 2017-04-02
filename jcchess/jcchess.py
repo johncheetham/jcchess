@@ -947,7 +947,7 @@ class Game:
         move = None
         try:
             move = self.movelist.pop()
-            #engine.command("undo")
+            self.chessboard.pop()
             self.redolist.append(move)
             self.lastmove = move
             self.stm = self.get_side_to_move()
@@ -974,7 +974,7 @@ class Game:
                    
     # undo a move without updating the gui
     def undo_move(self):
-        #engine.command("undo")
+        self.chessboard.pop()
         move = None
         try:
             move = self.movelist.pop()
@@ -1025,6 +1025,8 @@ class Game:
             # do the move in jcchess engine
             #engine.setplayer(self.stm)
             #engine.hmove(move)
+            jmove = chess.Move.from_uci(move)
+            self.chessboard.push(jmove)
 
             # side to move changes to opponent
             self.stm = self.get_side_to_move()
@@ -1059,6 +1061,8 @@ class Game:
             # do the move in jcchess engine
             #engine.setplayer(self.stm)
             #engine.hmove(move)
+            jmove = chess.Move.from_uci(move)
+            self.chessboard.push(jmove)
         except IndexError:
             pass
 
@@ -1075,7 +1079,7 @@ class Game:
          startc, endc =gv.gui.comment_view.get_buffer().get_bounds()
          gv.gui.comment_view.get_buffer().delete(startc,endc)
          gv.gui.comment_view.get_buffer().insert(startc,"-")   
-        if len(self.movelist) != 0:
+        if len(self.movelist) != 0 and gv.show_moves:
            gv.gui.move_view.get_selection().select_path(str(len(self.movelist)-1))
         nmove = len(self.movelist)
         move = None

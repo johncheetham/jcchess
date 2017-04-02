@@ -269,7 +269,9 @@ class Gui:
                 <separator/>
                 <menuitem action="Quit"/>
             </menu>
-            <menu action="Options"> 
+            <menu action="Options">
+                <menuitem action="Undo"/>
+                <menuitem action="Redo"/>
                 <menuitem action="MoveNow"/>
                 <separator/>
                 <menuitem action="TimeControl"/>
@@ -451,8 +453,8 @@ class Gui:
         toolitem = Gtk.ToolItem()
         vsep = Gtk.VSeparator()
         hb.pack_start(vsep, True, True, 10)
-        #toolitem.add(hb)
-        #toolbar.insert(toolitem, -1)
+        toolitem.add(hb)
+        toolbar.insert(toolitem, -1)
 
         # game review buttons
         
@@ -476,7 +478,7 @@ class Gui:
 
         toolitem = Gtk.ToolItem()
         toolitem.add(hb)
-        #toolbar.insert(toolitem, -1)
+        toolbar.insert(toolitem, -1)
                 
         # add a vertical separator
         hb = Gtk.HBox(False, 0)
@@ -1009,7 +1011,6 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
 
     # set the base window size at startup
     def set_window_size(self):
-        print(self.screen_width,self.screen_height)
         if self.screen_width > 575 and self.screen_height > 724:
             w = 575
             h = 724

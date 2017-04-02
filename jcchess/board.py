@@ -371,12 +371,8 @@ class Board:
     # on a square.
     def set_piece_at_square(self, x, y, piece):
         l = self.get_gs_loc(x, y)
-        print("l=",l)
-        print(self.board_position)
-        self.board_position = self.getboard() 
-        print("pppiece=",self.board_position[l])
+        self.board_position = self.getboard()
         self.board_position[l] = piece        
-        
         GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
 
     # called when user does a "clear board" in board edit
