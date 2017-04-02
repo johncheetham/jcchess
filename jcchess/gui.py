@@ -268,7 +268,7 @@ class Gui:
                 <menuitem action="NewGame"/>
                 <separator/>
                 <menuitem action="Quit"/>
-            </menu> 
+            </menu>
             <menu action="Options"> 
                 <menuitem action="MoveNow"/>
                 <separator/>
@@ -1236,7 +1236,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         tb_width = self.boardgrid.get_allocation().width
         tb_height = self.boardgrid.get_allocation().height
 
-        sq_size = int(tb_width / 9)
+        sq_size = int(tb_width / 8)
 
         if sq_size > 75:
             font_size = 11
@@ -1250,21 +1250,18 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
             font_size = 7
 
         cr.set_font_size(font_size)
-
-        # xpos = event.area.x + (event.area.width - tb_width) / 2 + sq_size / 2
-        #xpos = widget.get_allocation().x + (
-        #    widget.get_allocation().width - tb_width) / 2 + sq_size / 2
+        
+        
+        let = "abcdefghi"        
         xpos = int((widget.get_allocation().width - tb_width) / 2) + int(sq_size / 2)
-        # ypos = event.area.y + 14
-        # ypos = widget.get_allocation().y + 14
-        ypos = 14
-        # show co-ordinate numbers above the board
-        for num in range(1, 10):
-            cr.move_to(xpos, ypos)
-            cr.show_text(str(10 - num))
+        ypos = 14                
+        # show co-ordinate letters above the board
+        for num in range(1, 9):
+            cr.move_to(xpos, ypos) 
+            cr.show_text(let[num - 1])
             xpos = xpos + sq_size
-
-        # show co-ordinate letters to right of board
+        
+        # show co-ordinate numbers to right of board
         # xpos = event.area.x + event.area.width - 14
         # xpos = widget.get_allocation().x = widget.get_allocation().width -14
         xpos = widget.get_allocation().width - 14
@@ -1274,12 +1271,10 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         #   widget.get_allocation().height - tb_height) / 2 + sq_size / 2
         ypos = int((widget.get_allocation().height - tb_height) / 2) + int(sq_size / 2)
         let = "abcdefghi"
-        for num in range(1, 10):
+        for num in range(1, 9):
             cr.move_to(xpos, ypos)
-            cr.show_text(let[num - 1])
+            cr.show_text(str(9 - num))
             ypos = ypos + sq_size
-        a=1
-        #for debugging purposes
 
     def preferences(self, action):
         self.builder = Gtk.Builder()
