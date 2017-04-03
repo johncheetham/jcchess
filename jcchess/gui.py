@@ -281,7 +281,8 @@ class Gui:
                 <menuitem action="Engines"/>
                 <menuitem action="CommonEngineSettings"/>
             </menu>
-            <menu action="View"> 
+            <menu action="View">
+                <menuitem action="MoveList"/>
                 <menuitem action="EngineOutput"/>
                 <menuitem action="EngineDebug"/>
             </menu>

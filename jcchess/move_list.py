@@ -107,26 +107,14 @@ class Move_List:
         # update liststore
         self.liststore.clear()
         self.liststore.append(("0.", _("Start Pos"), " "))
-        return
-        # FIXME
-        mvstr = engine.getmovelist()
-        #mvstr= -; ;P7g7f,-; ;P3c3d,-; ;P8g8f,-; ;P4c4d,-; ;P9g9f,-; ;B2b3c
-        #
-        
+        movelist = gv.jcchess.get_movelist()        
         moveno = 1
-        if mvstr != "":
-            mlst = mvstr.split(",")
+        if len(movelist) != 0:
             moveno = 1
-            for m in mlst:
-
-                (capture, ispromoted, move) = m.split(";")
-
-                if move.find("*") == -1:
-                    m1 = move[0:3]
-                    m2 = move[3:]
-                    move = m1 + capture + m2
-                    if ispromoted == "+":
-                        move = "+" + move
+            for move in movelist:
+                m1 = move[0:2]
+                m2 = move[2:]
+                move = m1 + '-' + m2
                 comment = self.comments.get_comment(moveno)
                 if gv.show_moves == True:
                     gv.gui.comment_view.get_buffer().set_text("-")
@@ -147,6 +135,7 @@ class Move_List:
                                      
                      
                 moveno += 1
+ 
         comment = self.comments.get_comment(moveno)
         if comment != "":
             if gv.show_moves == True:
