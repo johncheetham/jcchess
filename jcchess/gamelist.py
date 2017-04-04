@@ -20,7 +20,7 @@
 from gi.repository import Gtk
 import os
 
-import jcchess.psn
+import jcchess.pgn
 from . import gv
 
 

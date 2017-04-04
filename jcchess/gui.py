@@ -267,6 +267,9 @@ class Gui:
             <menu action="File">
                 <menuitem action="NewGame"/>
                 <separator/>
+                <menuitem action="LoadGame"/>
+                <menuitem action="SaveGame"/>
+                <separator/>
                 <menuitem action="Quit"/>
             </menu>
             <menu action="Options">

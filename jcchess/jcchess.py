@@ -60,7 +60,7 @@ class Game:
         gv.jcchess = self
         self.xname = ""
         Filefound = False
-        self.chessboard = chess.Board()
+        self.init_board()
         # set global variables for debug messages
         gv.verbose, gv.verbose_uci, gv.show_moves, gv.show_header = utils.get_verbose()
     
@@ -689,7 +689,7 @@ class Game:
 
         self.gameover = False
         #engine.command("new")
-        self.chessboard = chess.Board() # init board
+        self.init_board()
         if menu_name == "NewGame":
             # Normal Game (No handicap)
             self.startpos = "startpos"
@@ -768,6 +768,14 @@ class Game:
          GLib.idle_add(gv.gui.header_lblgote.set_text,"")
          GLib.idle_add(gv.gui.header_lblevent.set_text, "")
          GLib.idle_add(gv.gui.header_lbldate.set_text, "")
+         
+    def init_board(self):
+        self.chessboard = chess.Board() # init board
+                
+                
+    def get_board(self):
+        return self.chessboard
+                    
     #
     # save users settings at program termination
     #

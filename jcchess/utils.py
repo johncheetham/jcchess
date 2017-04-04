@@ -24,7 +24,7 @@ import sys
 import pickle
 
 from . import load_save
-from . import psn
+from . import pgn
 from . import gv
 from .constants import VERSION
 

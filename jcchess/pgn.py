@@ -21,6 +21,8 @@ from . import gv
 from . import gamelist
 from . import comments
 from . import move_list
+from . import chess
+import chess.pgn
 from .constants import WHITE, BLACK
 
 
@@ -99,7 +101,8 @@ class Psn:
         movelist = []
         redolist = []
         startpos = "startpos"
-        engine.command("new")
+        #engine.command("new")
+        gv.jcchess.init_board()
         stm = BLACK
 
         movecnt = 0
@@ -250,30 +253,36 @@ class Psn:
 
             # move
             move, newptr = self.get_move(ptr, movelist, stm)
-            if move is not None:
+            if move is not None:            
                 ptr = newptr
 
-                engine.setplayer(stm)
+                #engine.setplayer(stm)
                 stm = stm ^ 1
                 if gv.verbose:
                     print("move=", move)
-                validmove = engine.hmove(move)
-                if (not validmove):
-                    # Should never get this message since get_move has already
-                    # validated the move aginst the legal move list
-                    # Can get it for sennichite (repetition)
-                    gv.gui.info_box(
-                        "Error loading file, illegal move (possible "
-                        "sennichite (repetition)):" + move + " move number:" +
-                        str(movecnt + 1))
-                    gv.jcchess.new_game("NewGame")
-                    gv.gui.set_status_bar_msg("Error loading game")
-                    return 1
+                #validmove = engine.hmove(move)
+                #validmove = chess.Move.from_uci(move) in gv.getboard().legal_moves
+                gv.jcchess.get_board().push(move)
+                #validmove = move
+                #if (not validmove):
+                #    # Should never get this message since get_move has already
+                #    # validated the move aginst the legal move list
+                #    # Can get it for sennichite (repetition)
+                #    gv.gui.info_box(
+                #        "Error loading file, illegal move (possible "
+                #        "sennichite (repetition)):" + move + " move number:" +
+                #        str(movecnt + 1))
+                #    gv.jcchess.new_game("NewGame")
+                #    gv.gui.set_status_bar_msg("Error loading game")
+                #    return 1
                 movecnt += 1
-                movelist.append(move)
-                lastmove = move
+                smove = str(move)                
+                movelist.append(smove)
+                lastmove = smove
                 if gv.verbose:
-                    engine.command("bd")
+                    #engine.command("bd")
+                    print("board fen:",repr(gv.jcchess.get_board()))
+                    print("board:\n",gv.jcchess.get_board())
 
                 continue
 
@@ -295,8 +304,8 @@ class Psn:
 
             ptr += 1
 
-        gv.usib.set_newgame()
-        gv.usiw.set_newgame()
+        gv.ucib.set_newgame()
+        gv.uciw.set_newgame()
         gv.gui.set_status_bar_msg("game loaded")
         self.gameover = False
 
@@ -410,59 +419,15 @@ class Psn:
             print()
             print("In get_move in psn.py")
             print("get_move has been passed this possible move:", move)
-
-        # Parse move and return its component parts
-        (promoted_piece, piece, source_square, dest_square,
-         move_promotes, move_equals, move_type) = self.parse_move(move,
-                                                                  movelist)
-        if piece is None:
-            if gv.verbose:
-                print("Unable to parse move:", move)
+            
+        try:    
+            validmove = gv.jcchess.get_board().parse_san(move)
+        except ValueError:
+            # Invalid Move
             return None, None
+            
+        return validmove, newptr
 
-        # Get list of legal moves
-        engine.setplayer(stm)
-        legal_move_list = self.get_legal_move_list(piece)
-        if gv.verbose:
-            print("legal_move_list=", legal_move_list)
-
-        # Create move by concat of component parts
-        if (self.validate_square(source_square) and
-                self.validate_square(dest_square)):
-            move = source_square + dest_square + move_promotes
-        else:
-            move = promoted_piece + piece + source_square + dest_square + \
-                   move_promotes
-
-        # Search for move in the legal move list
-        move2 = self.search_legal_moves(move, legal_move_list)
-        if move2 is not None:
-            # Move Found
-            # The move returned by the search is in the source+dest format
-            # suitable for jcchess
-            # e.g. S7b -> 7a7b
-            if gv.verbose:
-                print("Search succeeded and returned move:", move2)
-            return move2, newptr  # found a valid move
-
-        # Search failed
-        if gv.verbose:
-            print("Search did not find move")
-
-        # try a drop
-        if move_type == 1 and len(move) == 3:
-            rmove = move[0] + "*" + move[1:]
-            if gv.verbose:
-                print("trying a drop. move changed from", move, "to", rmove)
-            move2 = self.search_legal_moves(rmove, legal_move_list)
-            if move2 is not None:
-                # Move Found
-                if gv.verbose:
-                    print("Search succeeded and returned move:", move2)
-            return move2, newptr  # found a valid move
-
-        # No valid move found
-        return None, None
 
     # get list of legal moves
     def get_legal_move_list(self, piece):
@@ -505,7 +470,6 @@ class Psn:
     # parse move into promoted_piece, piece, source_square, dest_square,
     # move_promotes, move_equals
     def parse_move(self, orig_move, movelist):
-
         promoted_piece = ""
         piece = ""
         source_square = ""
@@ -834,8 +798,22 @@ class Psn:
             return None, None  # Not a move number
         return moveno, ptr
 
-    def load_game_psn(self, fname):
-
+    def load_game_pgn(self, fname):
+        
+        pgn = open(fname)
+        first_game = chess.pgn.read_game(pgn)
+        pgn.close()
+        
+        # Iterate through the mainline of this embarrasingly short game.
+        node = first_game
+        while not node.is_end():
+            next_node = node.variation(0)
+            print(node.board().san(next_node.move))
+            node = next_node
+        
+        return
+        
+        #FIXME
         self.fname = fname
 
         # check if it's a multi-game file

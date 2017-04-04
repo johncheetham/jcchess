@@ -26,7 +26,8 @@ from . import gv
 from . import move_list
 #import  utils
 from . import comments
-from . import psn
+from . import pgn
+import jcchess.chess.pgn
 from .constants import WHITE, BLACK,  VERSION,  NAME
 
 
@@ -36,7 +37,7 @@ class Load_Save:
 
     def __init__(self):
         self.move_list = move_list.get_ref()
-        self.psn = psn.get_ref()
+        self.pgn = pgn.get_ref()
         self.comments = comments.get_ref() 
         
 
@@ -52,14 +53,14 @@ class Load_Save:
         #dialog.set_current_folder(os.path.expanduser("~"))
         dialog.set_current_folder(gv.lastdir)
         filter = Gtk.FileFilter()
-        filter.set_name("psn files")
-        filter.add_pattern("*.psn")
+        filter.set_name("pgn files")
+        filter.add_pattern("*.pgn")
         dialog.add_filter(filter)
 
-        filter = Gtk.FileFilter()
-        filter.set_name("gshog files")
-        filter.add_pattern("*.gshog")
-        dialog.add_filter(filter)
+        #filter = Gtk.FileFilter()
+        #filter.set_name("gshog files")
+        #filter.add_pattern("*.gshog")
+        #dialog.add_filter(filter)
 
         filter = Gtk.FileFilter()
         filter.set_name("All files")
@@ -79,7 +80,7 @@ class Load_Save:
         gv.gui.window.set_title(NAME + " " + VERSION + "  " + os.path.basename(fname))
         dialog.destroy()
 
-        if fname.endswith(".psn"):
+        if fname.endswith(".pgn"):
             self.get_header_from_file(fname)
             #entries from malformatted files would break the GUI of the program
             if gv.show_header == True:
@@ -91,19 +92,64 @@ class Load_Save:
                 #print(gv.event)
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
                 #print(gv.gamedate)
-            self.psn.load_game_psn(fname)
-            return
-
-        if fname.endswith(".gshog"):
-            self.load_game_gshog(fname)
-            GLib.idle_add(gv.gui.header_lblsente.set_text, "")
-            GLib.idle_add(gv.gui.header_lblgote.set_text, "")
-            GLib.idle_add(gv.gui.header_lblevent.set_text, "")
-            GLib.idle_add(gv.gui.header_lbldate.set_text, "")
+            self.load_game_pgn(fname)
             return
 
          #loads filename from 1st argument in commandline
 
+    def load_game_pgn(self, fname):
+        pgn = open(fname)
+        first_game = jcchess.chess.pgn.read_game(pgn)
+        pgn.close()        
+
+        stm = WHITE
+        movecnt = 0
+        movelist = []
+        redolist = []
+        startpos = "startpos"
+        node = first_game
+        while not node.is_end():
+            next_node = node.variation(0)
+            stm = stm ^ 1 
+            move = node.board().san(next_node.move)
+            if gv.verbose:
+                print("move=", move)
+            move = gv.jcchess.get_board().parse_san(move)
+            if gv.verbose:
+                print("move=", move)
+            gv.jcchess.get_board().push(move)
+            movecnt += 1
+            smove = str(move)                
+            movelist.append(smove)
+            lastmove = smove
+            if gv.verbose:
+                #engine.command("bd")
+                print("board fen:",repr(gv.jcchess.get_board()))
+                print("board:\n",gv.jcchess.get_board())
+            node = next_node
+            
+        gv.ucib.set_newgame()                    
+        gv.uciw.set_newgame()
+        gv.gui.set_status_bar_msg("game loaded")
+        self.gameover = False
+
+        gv.jcchess.set_movelist(movelist)
+        gv.jcchess.set_redolist(redolist)
+        gv.jcchess.set_startpos(startpos)
+        gv.jcchess.set_lastmove(lastmove)
+
+        gv.board.update()
+
+        # update move list in move list window
+        self.move_list.update()
+        stm = gv.jcchess.get_side_to_move()
+        gv.jcchess.set_side_to_move(stm)
+        gv.gui.set_side_to_move(stm)
+
+        gv.tc.reset_clock()
+
+        return 0
+        
     def load_game_parm(self,fname):        
         try:
                 fp = open(fname)
@@ -353,14 +399,14 @@ class Load_Save:
         dialog.set_current_folder(gv.lastdir)
 
         filter = Gtk.FileFilter()
-        filter.set_name("psn files")
-        filter.add_pattern("*.psn")
+        filter.set_name("pgn files")
+        filter.add_pattern("*.pgn")
         dialog.add_filter(filter)
 
-        filter = Gtk.FileFilter()
-        filter.set_name("gshog files")
-        filter.add_pattern("*.gshog")
-        dialog.add_filter(filter)
+        #filter = Gtk.FileFilter()
+        #filter.set_name("gshog files")
+        #filter.add_pattern("*.gshog")
+        #dialog.add_filter(filter)
 
         filter = Gtk.FileFilter()
         filter.set_name("All files")
@@ -381,11 +427,9 @@ class Load_Save:
                 print("saving: " + gv.lastdir)
             gv.gui.window.set_title(NAME + " " + VERSION + "  " + os.path.basename(filename))
            
-            if not filename.endswith('.gshog') and not filename.endswith('.psn'):
-                if dialog.get_filter().get_name() == "psn files":
-                    filename = filename + ".psn"
-                else:
-                    filename = filename + ".gshog"
+            if not filename.endswith('.pgn'):
+                if dialog.get_filter().get_name() == "pgn files":
+                    filename = filename + ".pgn" 
 
             # If file already exists then ask before overwriting
             if os.path.isfile(filename):
@@ -395,8 +439,16 @@ class Load_Save:
                 if resp == Gtk.ResponseType.CANCEL:
                     dialog.destroy()
                     return
-
-            if filename.endswith(".psn"):
+                    
+            if filename.endswith(".pgn"):                
+                game = jcchess.chess.pgn.Game.from_board(gv.jcchess.get_board())
+                #print("game=",game)                
+                f = open(filename, "w",)
+                print(game, file=f, end="\n\n")
+                f.close()
+                
+            """
+            if filename.endswith(".pgn"):
                 # save in psn format
                 gamestr = self.get_game()
                 # we must get the last header read:
@@ -427,31 +479,8 @@ class Load_Save:
                 f = open(filename, "w")
                 f.write(gamestr)
                 f.close()
-            else:
-                # save in gshog format
-                # engine.command("save " + filename)
-
-                # comments cannot be saved in gshog format
-                # if there are comments warn the user
-                if self.comments.has_comments():
-                    msg = "Warning. This Game has comments which will be " \
-                          "lost if you save in this format."
-                    msg += "\nTo save the comments save in PSN format instead."
-                    gv.gui.info_box(msg)
-
-                # if the movelist is positioned part way through the game then
-                # we must redo all moves so the full game will be saved
-                redo_count = len(gv.jcchess.get_redolist())
-                for i in range(0, redo_count):
-                    gv.jcchess.redo_move()
-
-                engine.savegame(filename, "startpos " + startpos + "\n")
-
-                # if we did any redo moves then undo them now to get things
-                # back the way they were
-                for i in range(0, redo_count):
-                    gv.jcchess.undo_move()
-
+            """
+            
             gv.gui.set_status_bar_msg(_("game saved:  " + filename) + "  "+ VERSION)
 
         dialog.destroy()
