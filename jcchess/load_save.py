@@ -21,6 +21,7 @@ from gi.repository import Gtk
 import os
 import errno
 from datetime import date
+#from io import StringIO
 from . import constants
 from . import gv
 from . import move_list
@@ -92,46 +93,53 @@ class Load_Save:
                 #print(gv.event)
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
                 #print(gv.gamedate)
-            self.load_game_pgn(fname)
+            #self.load_game(fname)
+            pgn = open(fname)
+            first_game = jcchess.chess.pgn.read_game(pgn)
+            pgn.close()
+            self.load_game_pgn(first_game)
             return
 
          #loads filename from 1st argument in commandline
 
-    def load_game_pgn(self, fname):
-        pgn = open(fname)
-        first_game = jcchess.chess.pgn.read_game(pgn)
-        pgn.close()        
-
+    #def load_game(self, fname):
+    #    pgn = open(fname)
+    #    first_game = jcchess.chess.pgn.read_game(pgn)
+    #    pgn.close()
+    #    self.load_game_pgn(first_game)
+        
+    def load_game_pgn(self, game):    
         stm = WHITE
         movecnt = 0
         movelist = []
         redolist = []
         startpos = "startpos"
-        node = first_game
+        gv.board.init_board()
+        node = game
         while not node.is_end():
             next_node = node.variation(0)
             stm = stm ^ 1 
             move = node.board().san(next_node.move)
             if gv.verbose:
                 print("move=", move)
-            move = gv.jcchess.get_board().parse_san(move)
+                print("type=",type(move))
+            move = gv.board.parse_san(move)
             if gv.verbose:
                 print("move=", move)
-            gv.jcchess.get_board().push(move)
+                print("type=",type(move))
+            gv.board.add_move(move)
             movecnt += 1
             smove = str(move)                
             movelist.append(smove)
             lastmove = smove
             if gv.verbose:
-                #engine.command("bd")
-                print("board fen:",repr(gv.jcchess.get_board()))
-                print("board:\n",gv.jcchess.get_board())
+                gv.board.print_board()
             node = next_node
             
         gv.ucib.set_newgame()                    
         gv.uciw.set_newgame()
         gv.gui.set_status_bar_msg("game loaded")
-        self.gameover = False
+        #self.gameover = False
 
         gv.jcchess.set_movelist(movelist)
         gv.jcchess.set_redolist(redolist)
@@ -149,6 +157,10 @@ class Load_Save:
         gv.tc.reset_clock()
 
         return 0
+        
+    #def load_game_pgn_from_str(gamestr):
+    #    pgn = StringIO(pgn_string)
+    #    game = chess.pgn.read_game(pgn)
         
     def load_game_parm(self,fname):        
         try:
@@ -223,24 +235,25 @@ class Load_Save:
                 
     # this routine is called from utils.py (when doing paste position)
     # and from gui.py (when ending an edit board session).
-    def init_game(self, sfen):
-        engine.setfen(sfen)
-        startpos = sfen
-        sfenlst = sfen.split()
-        if sfenlst[1] == "b":
-            if gv.verbose:
-                print("setting stm to black")
-            stm = BLACK
-        elif sfenlst[1] == "w":
-            stm = WHITE
-        else:
-            stm = BLACK
-        engine.setplayer(stm)
+    def init_game(self, fen):
+        #engine.setfen(sfen)
+        gv.board.init_board(fen)
+        startpos = fen
+        #fenlst = fen.split()
+        #if fenlst[1] == "b":
+        #    if gv.verbose:
+        #        print("setting stm to black")
+        #    stm = BLACK
+        #elif fenlst[1] == "w":
+        #    stm = WHITE
+        #else:
+        #    stm = BLACK
+        #engine.setplayer(stm)
 
-        gv.usib.set_newgame()
-        gv.usiw.set_newgame()
+        gv.ucib.set_newgame()
+        gv.uciw.set_newgame()
         gv.gui.set_status_bar_msg(_("ready"))
-        self.gameover = False
+        #self.gameover = False
 
         gv.jcchess.set_movelist([])
         gv.jcchess.set_redolist([])
@@ -255,66 +268,6 @@ class Load_Save:
         gv.jcchess.set_side_to_move(stm)
         gv.gui.set_side_to_move(stm)
         gv.jcchess.set_lastmove("")
-
-        gv.tc.reset_clock()
-        
-       
-
-    def load_game_gshog(self, fname):
-        rc = engine.loadgame(fname)
-        if (rc > 0):
-                gv.gui.info_box("Error  loading game - not a valid gshog file")
-                return
-
-        self.comments.clear_comments()
-
-        # get movelistVERSION
-        f = open(fname)
-        startmoves = False
-        movelist = []
-        redolist = []
-        startpos = "startpos"
-        while 1:
-            line = f.readline()
-            if not line:
-                break
-            if line.startswith("startpos"):
-                startpos = line[9:].strip()
-                if gv.verbose:
-                    print("startpos set to", startpos)
-                continue
-            if startmoves:
-                l = line.strip()
-                sl = l.split()
-                m = sl[0]
-                if m.startswith("+"):
-                    m = m[1:]
-                if m.find("*") != -1:
-                    move = m
-                else:
-                    move = m[1:]
-                movelist.append(move)
-            if line.startswith("  move   score depth"):
-                startmoves = True
-        f.close()
-
-        gv.usib.set_newgame()
-        gv.usiw.set_newgame()
-        gv.gui.set_status_bar_msg("game loaded:  " + fname +"   " +VERSION)
-        self.gameover = False
-
-        gv.jcchess.set_movelist(movelist)
-        gv.jcchess.set_redolist(redolist)
-        gv.jcchess.set_startpos(startpos)
-
-        gv.board.update()
-        # update move list in move list window
-        self.move_list.update()
-        stm = gv.jcchess.get_side_to_move()
-        gv.jcchess.set_side_to_move(stm)
-        gv.gui.set_side_to_move(stm)
-        gv.jcchess.set_lastmove("")
-        utils.get_gamelist_ref().set_game_list([])
 
         gv.tc.reset_clock()
 
@@ -441,7 +394,8 @@ class Load_Save:
                     return
                     
             if filename.endswith(".pgn"):                
-                game = jcchess.chess.pgn.Game.from_board(gv.jcchess.get_board())
+                #game = jcchess.chess.pgn.Game.from_board(gv.jcchess.get_board())
+                game = gv.board.get_game()
                 #print("game=",game)                
                 f = open(filename, "w",)
                 print(game, file=f, end="\n\n")

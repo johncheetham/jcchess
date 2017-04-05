@@ -25,6 +25,7 @@ from gi.repository import GLib
 import cairo
 
 from . import chess
+import jcchess.chess.pgn
 from . import gv
 from .constants import WHITE, BLACK
 
@@ -38,6 +39,7 @@ class Board:
         #self.chessboard = chess.Board()
         #print("self.chessboard=\n",self.chessboard)
         #print(" ")
+        self.init_board()
         self.board_position = self.getboard()        
         
         #self.board_array= [[' ' for x in range(8)] for y in range(8)]
@@ -46,7 +48,13 @@ class Board:
         #print("len=",len(self.board_position))
         #self.board_position= [' r', ' n', ' b', ' q', ' k', ' b', ' n', ' r', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' R', ' N', ' B', ' Q', ' K', ' B', ' N', ' R']        
         #print("len=",len(self.board_position))
-        self.dnd = None
+        self.dnd = None        
+
+    def init_board(self, fen="std"):
+        if fen == "std":
+            self.chessboard = chess.Board() # init board
+        else:
+            self.chessboard = chess.Board(fen)    
         
     def build_board(self):
         GObject.idle_add(self.update)
@@ -252,7 +260,7 @@ class Board:
         
         b = []
         
-        for x in gv.jcchess.chessboard.fen():
+        for x in self.chessboard.fen():
             #print(x)
             """
             if x == "R":
@@ -443,7 +451,7 @@ class Board:
         #piece = self.board_position[l]
         #print("x,yyyyy=",x,y,piece)
         #print(gv.jcchess.chessboard.piece_at(chess.square(x, y)))
-        piece = gv.jcchess.chessboard.piece_at(chess.square(x, y))
+        piece = self.chessboard.piece_at(chess.square(x, y))
         #piece = gv.jcchess.chessboard.piece_at(chess.square(x, 7-y))
         #if piece == None:
         #    piece = " "
@@ -451,3 +459,49 @@ class Board:
         #    piece = str(piece) 
         piece = str(piece)   
         return piece
+
+    def get_legal_moves(self):
+        return self.chessboard.legal_moves
+        
+    def add_move(self, cmove):    
+        self.chessboard.push(cmove)
+        
+    def remove_move(self):
+        self.chessboard.pop()
+        
+    def print_board(self):
+        #engine.command("bd")
+        print("board fen:",repr(self.chessboard))
+        print("board:\n",self.chessboard)
+        
+    def is_gameover(self):
+        if self.chessboard.is_game_over():
+            return True
+        else:
+            return False
+                
+    #def is_checkmate(self):
+    #    if self.chessboard.is_checkmate():
+    #        return True
+    #    else:
+    #        return False
+            
+    #def get_board(self):
+    #    return self.chessboard                
+
+    def parse_san(self, move):
+        return self.chessboard.parse_san(move)
+        
+    def get_game(self):
+        game = jcchess.chess.pgn.Game.from_board(self.chessboard)         
+        del game.headers["Event"]
+        del game.headers["Site"]
+        del game.headers["Date"]
+        del game.headers["Round"]
+        game.headers["White"] = gv.jcchess.get_player(WHITE)
+        game.headers["Black"] = gv.jcchess.get_player(BLACK)
+        return game
+        
+    def get_fen(self):
+        return self.chessboard.fen()
+                

@@ -183,9 +183,9 @@ class Gui:
              _("Show About Box"), self.about_box),
             ("Help", None, _("_Help")),
             ("CopyPosition", None, _("_Copy Position"), None,
-             _("Copy Position"), utils.copy_SFEN_to_clipboard),
+             _("Copy Position"), utils.copy_FEN_to_clipboard),
             ("PastePosition", None, _("_Paste Position"), None,
-             _("Paste Position"), utils.paste_clipboard_to_SFEN),
+             _("Paste Position"), utils.paste_clipboard_to_FEN),
             ("CopyGame", None, _("_Copy Game"), None,
              _("Copy Game"), utils.copy_game_to_clipboard),
             ("PasteGame", None, _("_Paste Game"), None,
@@ -271,6 +271,13 @@ class Gui:
                 <menuitem action="SaveGame"/>
                 <separator/>
                 <menuitem action="Quit"/>
+            </menu>
+            <menu action="Edit">
+                <menuitem action="CopyPosition"/>
+                <menuitem action="PastePosition"/>
+                <separator/>
+                <menuitem action="CopyGame"/>
+                <menuitem action="PasteGame"/>
             </menu>
             <menu action="Options">
                 <menuitem action="Undo"/>

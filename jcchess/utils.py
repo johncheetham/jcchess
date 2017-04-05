@@ -22,6 +22,8 @@ from gi.repository import Gdk
 import os
 import sys
 import pickle
+import jcchess.chess.pgn
+from io import StringIO
 
 from . import load_save
 from . import pgn
@@ -29,23 +31,24 @@ from . import gv
 from .constants import VERSION
 
 
-# Copy the board position to the clipboard in std SFEN format
-def copy_SFEN_to_clipboard(action):
-    sfen = gv.board.get_sfen()
-    copy_text_to_clipboard(sfen)
+# Copy the board position to the clipboard in std FEN format
+def copy_FEN_to_clipboard(action):
+    #sfen = gv.board.get_sfen()
+    fen = gv.board.get_fen()
+    copy_text_to_clipboard(fen)
 
 
 # paste a position from the clipboard
-def paste_clipboard_to_SFEN(action):
-    sfen = get_text_from_clipboard()
-    if sfen is None:
-        gv.gui.info_box("Error: invalid sfen")
+def paste_clipboard_to_FEN(action):
+    fen = get_text_from_clipboard()
+    if fen is None:
+        gv.gui.info_box("Error: invalid fen")
         return
-    if not validate_sfen(sfen):
-        gv.gui.info_box("Error: invalid sfen")
-        return
+    #if not validate_sfen(sfen):
+    #    gv.gui.info_box("Error: invalid fen")
+    #    return
     load_save_ref = load_save.get_ref()
-    load_save_ref.init_game(sfen)
+    load_save_ref.init_game(fen)
 
 
 # lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1
@@ -85,9 +88,10 @@ def validate_sfen(sfen):
 
 
 def copy_game_to_clipboard(action):
-    load_save_ref = load_save.get_ref()
-    gamestr = load_save_ref.get_game()
-    copy_text_to_clipboard(gamestr)
+    #load_save_ref = load_save.get_ref()
+    #gamestr = load_save_ref.get_game()
+    #copy_text_to_clipboard(gamestr)
+    copy_text_to_clipboard(str(gv.board.get_game()))
 
 
 def paste_game_from_clipboard(action):
@@ -95,10 +99,14 @@ def paste_game_from_clipboard(action):
     if gamestr is None:
         print("Error invalid game data")
         return
-    psn_ref = psn.get_ref()
-    psn_ref.load_game_psn_from_str(gamestr)
+    #psn_ref = psn.get_ref()
+    #psn_ref.load_game_psn_from_str(gamestr)
+    pgn = StringIO(gamestr)
+    game = jcchess.chess.pgn.read_game(pgn)
+    load_save_ref = load_save.get_ref()
+    load_save_ref.load_game_pgn(game)
 
-
+    
 def copy_text_to_clipboard(text):
     # get the clipboard
     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)

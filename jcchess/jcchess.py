@@ -60,7 +60,6 @@ class Game:
         gv.jcchess = self
         self.xname = ""
         Filefound = False
-        self.init_board()
         # set global variables for debug messages
         gv.verbose, gv.verbose_uci, gv.show_moves, gv.show_header = utils.get_verbose()
     
@@ -260,17 +259,14 @@ class Game:
         """
         if gv.verbose:
             print("move=", move)
-
-        #engine.setplayer(self.stm)
-        #print("move=",move)
-        validmove = chess.Move.from_uci(move) in self.chessboard.legal_moves
-        #validmove = engine.hmove(move)
+ 
+        cmove = chess.Move.from_uci(move)
+        validmove = cmove in gv.board.get_legal_moves() 
         if (not validmove):
             # illegal move
             gv.gui.set_status_bar_msg(_("Illegal Move"))
             return None
-        jmove = chess.Move.from_uci(move)
-        self.chessboard.push(jmove)
+        gv.board.add_move(cmove)
         return move
 
     def human_move(self, move):
@@ -284,9 +280,8 @@ class Game:
         self.move_list.update()
 
         if gv.verbose:
-            #engine.command("bd")
-            print("board fen:",repr(self.chessboard))
-            print("board:\n",self.chessboard)
+            gv.board.print_board()
+
         self.src = ""
 
         self.gameover, msg = self.check_for_gameover()
@@ -526,8 +521,9 @@ class Game:
                     return
 
                 # engine.setplayer(WHITE)
-                #engine.setplayer(self.stm)                    
-                validmove = chess.Move.from_uci(self.cmove) in self.chessboard.legal_moves
+                #engine.setplayer(self.stm)
+                cmove = chess.Move.from_uci(self.cmove)                    
+                validmove = cmove in gv.board.get_legal_moves()
                 #validmove = engine.hmove(self.cmove)
                 if (not validmove):
                     GLib.idle_add(self.stop)
@@ -537,13 +533,9 @@ class Game:
                     self.thinking = False
                     self.move_list.comments.automatic_comment(self.cmove + _(" - computer made illegal Move!"),len(self.movelist))
                     return
-                move = chess.Move.from_uci(self.cmove)
-                self.chessboard.push(move)
+                gv.board.add_move(cmove)
                 if gv.verbose:
-                    #engine.command("bd")
-                    print("board fen:",repr(self.chessboard))
-                    print("board:\n",self.chessboard)
-
+                    gv.board.print_board()
 
                 if self.cmove != "":
                     self.movelist.append(self.cmove)
@@ -571,9 +563,7 @@ class Game:
                 #     self.uci.send_ponder, () )
 
                 if gv.verbose:
-                    #engine.command("bd")
-                    print("board fen:",repr(self.chessboard))
-                    print("board:\n",self.chessboard)
+                    gv.board.print_board()
                     
                 if gv.verbose:
                     print("move=", self.cmove)
@@ -607,8 +597,8 @@ class Game:
         gameover = False
         msg = ""
         #winner = engine.getwinner()
-        #if (winner):
-        if self.chessboard.is_checkmate():        
+        #if (winner):        
+        if gv.board.is_gameover():            
             gameover = True
             #winner -= 1
             #if (winner == BLACK):
@@ -689,7 +679,7 @@ class Game:
 
         self.gameover = False
         #engine.command("new")
-        self.init_board()
+        gv.board.init_board()
         if menu_name == "NewGame":
             # Normal Game (No handicap)
             self.startpos = "startpos"
@@ -767,14 +757,7 @@ class Game:
          GLib.idle_add(gv.gui.header_lblsente.set_text, "")
          GLib.idle_add(gv.gui.header_lblgote.set_text,"")
          GLib.idle_add(gv.gui.header_lblevent.set_text, "")
-         GLib.idle_add(gv.gui.header_lbldate.set_text, "")
-         
-    def init_board(self):
-        self.chessboard = chess.Board() # init board
-                
-                
-    def get_board(self):
-        return self.chessboard
+         GLib.idle_add(gv.gui.header_lbldate.set_text, "")                
                     
     #
     # save users settings at program termination
@@ -955,7 +938,7 @@ class Game:
         move = None
         try:
             move = self.movelist.pop()
-            self.chessboard.pop()
+            gv.board.remove_move()
             self.redolist.append(move)
             self.lastmove = move
             self.stm = self.get_side_to_move()
@@ -982,7 +965,7 @@ class Game:
                    
     # undo a move without updating the gui
     def undo_move(self):
-        self.chessboard.pop()
+        gv.board.remove_move()
         move = None
         try:
             move = self.movelist.pop()
@@ -1033,8 +1016,8 @@ class Game:
             # do the move in jcchess engine
             #engine.setplayer(self.stm)
             #engine.hmove(move)
-            jmove = chess.Move.from_uci(move)
-            self.chessboard.push(jmove)
+            cmove = chess.Move.from_uci(move)
+            gv.board.add_move(cmove)
 
             # side to move changes to opponent
             self.stm = self.get_side_to_move()
@@ -1069,8 +1052,8 @@ class Game:
             # do the move in jcchess engine
             #engine.setplayer(self.stm)
             #engine.hmove(move)
-            jmove = chess.Move.from_uci(move)
-            self.chessboard.push(jmove)
+            cmove = chess.Move.from_uci(move)
+            gv.board.add_move(cmove)
         except IndexError:
             pass
 

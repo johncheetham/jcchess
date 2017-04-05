@@ -318,9 +318,9 @@ class Uci:
 
         startpos = gv.jcchess.get_startpos()
 
-        # if not startpos must be sfen
+        # if not startpos must be fen
         if startpos != "startpos":
-            startpos = "sfen " + startpos
+            startpos = "fen " + startpos
 
         ml = ""
         for move in movelist:
@@ -507,7 +507,7 @@ class Uci:
 
         # if not startpos must be sfen
         if startpos != "startpos":
-            startpos = "sfen " + startpos
+            startpos = "fen " + startpos
 
         ml = ""
         for move in movelist:
