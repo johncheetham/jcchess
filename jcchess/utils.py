@@ -26,7 +26,6 @@ import jcchess.chess.pgn
 from io import StringIO
 
 from . import load_save
-from . import pgn
 from . import gv
 from .constants import VERSION
 

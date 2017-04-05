@@ -122,17 +122,17 @@ class Uci:
 
         # set pondering
         # self.command("setoption name UCI_Ponder value false\n")
-        if gv.engine_manager.get_ponder():
-            ponder_str = "true"
-        else:
-            ponder_str = "false"
-        self.command("setoption name UCI_Ponder value " + ponder_str + "\n")
+        #if gv.engine_manager.get_ponder():
+        #    ponder_str = "true"
+        #else:
+        #    ponder_str = "false"
+        #self.command("setoption name UCI_Ponder value " + ponder_str + "\n")
 
         # set hash value
         # self.command("setoption name UCI_Hash value 256\n")
-        self.command(
-            "setoption name UCI_Hash value " +
-            str(gv.engine_manager.get_hash_value()) + "\n")
+        #self.command(
+        #    "setoption name UCI_Hash value " +
+        #    str(gv.engine_manager.get_hash_value()) + "\n")
 
         # Ask if ready
         self.command("isready\n")

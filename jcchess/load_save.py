@@ -21,13 +21,10 @@ from gi.repository import Gtk
 import os
 import errno
 from datetime import date
-#from io import StringIO
 from . import constants
 from . import gv
 from . import move_list
-#import  utils
 from . import comments
-from . import pgn
 import jcchess.chess.pgn
 from .constants import WHITE, BLACK,  VERSION,  NAME
 
@@ -38,7 +35,6 @@ class Load_Save:
 
     def __init__(self):
         self.move_list = move_list.get_ref()
-        self.pgn = pgn.get_ref()
         self.comments = comments.get_ref() 
         
 
@@ -94,9 +90,9 @@ class Load_Save:
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
                 #print(gv.gamedate)
             #self.load_game(fname)
-            pgn = open(fname)
-            first_game = jcchess.chess.pgn.read_game(pgn)
-            pgn.close()
+            f = open(fname)
+            first_game = jcchess.chess.pgn.read_game(f)
+            f.close()
             self.load_game_pgn(first_game)
             return
 

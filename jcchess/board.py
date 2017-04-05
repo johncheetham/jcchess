@@ -367,27 +367,32 @@ class Board:
     # called from jcchess.py to clear the source square when a drag of
     # a piece has started
     #
-    def set_square_as_unoccupied(self, x, y): 
-        #piece = " -"    # empty square
+    def set_square_as_unoccupied(self, x, y):
         piece = "None"    # empty square
         self.dnd = (x, y)
-        self.set_piece_at_square(x, y, piece)
+        # redraw square
+        GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
 
-    # called from this module to clear the source square when draggin and
-    # dropping.
-    # Also called from gui.py when editing the board position to set the piece
+    # called from gui.py when editing the board position to set the piece
     # on a square.
-    def set_piece_at_square(self, x, y, piece):
-        l = self.get_gs_loc(x, y)
-        self.board_position = self.getboard()
-        self.board_position[l] = piece        
+    def set_piece_at_square(self, x, y, piece, colour):
+        print("pppiece=",piece)
+        #self.chessboard.set_piece_at(square, piece, promoted=False)
+        self.chessboard.set_piece_at(chess.square(x, y), chess.Piece(piece, colour))
+        print("pieceat=",self.chessboard.piece_at(chess.square(x, y)))
+        #l = self.get_gs_loc(x, y)
+        #self.board_position = self.getboard()
+        #self.board_position[l] = piece
+        #self.update()        
         GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
 
     # called when user does a "clear board" in board edit
     def clear_board(self):
-        for x in range(8):
-            for y in range(8):
-                self.set_square_as_unoccupied(x, y)
+        self.chessboard.clear()
+        self.update()
+        #for x in range(8):
+        #    for y in range(8):
+        #        self.set_square_as_unoccupied(x, y)
 
     def set_image_cairo(self, x, y, cr=None, widget=None):
         piece = self.get_piece(x, y)

@@ -35,6 +35,7 @@ from . import load_save
 from . import utils
 from . import gamelist
 from . import comments
+from . import chess
 from .constants import WHITE, BLACK, NAME, VERSION, TARGET_TYPE_TEXT
 from . import gv
 
@@ -278,6 +279,8 @@ class Gui:
                 <separator/>
                 <menuitem action="CopyGame"/>
                 <menuitem action="PasteGame"/>
+                <separator/>
+                <menuitem action="EditPosition"/>
                 <separator/>
                 <menuitem action="Preferences"/>
             </menu>
@@ -1077,30 +1080,39 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
     def build_edit_popup(self):
         self.edit_mode = False
 
+        """
         popup_items = ["Separator",
                        _("Empty"),
                        _("Pawn"),
+                       _("Knight"),
                        _("Bishop"),
                        _("Rook"),
-                       _("Lance"),
-                       _("Knight"),
-                       _("Silver"),
-                       _("Gold"),
+                       _("Queen"),                
                        _("King"),
-                       "Separator",
-                       _("+Pawn"),
-                       _("+Bishop"),
-                       _("+Rook"),
-                       _("+Lance"),
-                       _("+Knight"),
-                       _("+Silver"),
-                       "Separator",
+                       "Separator", 
                        _("Black to Move"),
                        _("White to Move"),
                        "Separator",
                        _("Clear Board"),
                        "Separator",
                        _("Cancel"),
+                       _("End")]
+        """                
+        
+        popup_items = ["Separator",
+                       _("Empty"),
+                       _("Pawn"),
+                       _("Knight"),
+                       _("Bishop"),
+                       _("Rook"),
+                       _("Queen"),                
+                       _("King"),
+                       "Separator", 
+                       _("Black to Move"),
+                       _("White to Move"),
+                       "Separator",
+                       _("Clear Board"),
+                       "Separator",
                        _("End")]
 
         # set up menu for black
@@ -1142,7 +1154,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
                 "Unable to edit board - you need a newer version of pygtk"
                 "(version 2.16 or above)")
             return
-
+        print("piece_name=",piece_name)
         if piece_name == _("Clear Board"):
             gv.board.clear_board()
             return
@@ -1150,11 +1162,13 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         if piece_name == _("Black to Move"):
             gv.jcchess.set_side_to_move(BLACK)
             self.set_side_to_move(BLACK)   # update ind in gui
+            gv.board.chessboard.turn=chess.BLACK
             return
 
         if piece_name == _("White to Move"):
             gv.jcchess.set_side_to_move(WHITE)
             self.set_side_to_move(WHITE)   # update ind in gui
+            gv.board.chessboard.turn=chess.WHITE
             return
 
         if piece_name == _("Cancel"):
@@ -1175,24 +1189,43 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         #    "+n", "+s", "+b", "+r", " P", " L", " N", " S", " G", " B", " R",
         #    " K", "+P", "+L", "+N", "+S", "+B", "+R"]
 
-        piece_dict = {
-            _("Empty"): " -", _("Pawn"): " p", _("Lance"): " l", _("Knight"): " n",
-            _("Silver"): " s", _("Gold"): " g", _("Bishop"): " b", _("Rook"): " r",
-            _("King"): " k", _("+Pawn"): "+p", _("+Lance"): "+l", _("+Knight"): "+n",
-            _("+Silver"): "+s", _("+Bishop"): "+b", _("+Rook"): "+r"}
+        #piece_dict = {
+        #    _("Empty"): " -", _("Pawn"): "p", _("Lance"): " l", _("Knight"): " n",
+        #    _("Silver"): " s", _("Gold"): " g", _("Bishop"): " b", _("Rook"): " r",
+        #    _("King"): " k", _("+Pawn"): "+p", _("+Lance"): "+l", _("+Knight"): "+n",
+        #    _("+Silver"): "+s", _("+Bishop"): "+b", _("+Rook"): "+r"} 
+            
+        if piece_name == _("Empty"):
+            piece = None
+        elif piece_name == _("Pawn"):
+            piece = chess.PAWN
+        elif piece_name == _("Knight"):
+            piece = chess.KNIGHT
+        elif piece_name == _("Bishop"):
+            piece = chess.BISHOP
+        elif piece_name == _("Rook"):
+             piece = chess.ROOK
+        elif piece_name == _("Queen"):
+            piece = chess.QUEEN
+        elif piece_name == _("King"):
+            piece = chess.KING    
+            
 
-        piece = piece_dict[piece_name]
         if colour == WHITE:
-            piece = piece.upper()
+            colour = chess.WHITE
+        else:
+            colour = chess.BLACK    
         # add piece to main board
-        gv.board.set_piece_at_square(self.ed_x, self.ed_y, piece)
+        print("sssss=",self.ed_x, self.ed_y)
+        gv.board.set_piece_at_square(self.ed_x, self.ed_y, piece, colour)
 
     # save position and exit edit mode
     def end_edit(self):
         self.edit_mode = False
-        sfen = gv.board.get_sfen()
+        #sfen = gv.board.get_sfen()
+        fen = gv.board.get_fen()
         load_save_ref = load_save.get_ref()
-        load_save_ref.init_game(sfen)      # update board to reflect edit
+        load_save_ref.init_game(fen)      # update board to reflect edit
         self.enable_menu_items(mode="editmode")
 
     def enable_edit_mode(self, action):
