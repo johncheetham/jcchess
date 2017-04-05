@@ -389,7 +389,7 @@ class Board:
             for y in range(8):
                 self.set_square_as_unoccupied(x, y)
 
-    def set_image_cairo(self, x, y, cr=None, widget=None):        
+    def set_image_cairo(self, x, y, cr=None, widget=None):
         piece = self.get_piece(x, y)
         #print("xxxxxxxx,y=",x,y,piece)
 
@@ -406,16 +406,32 @@ class Board:
         # in last move and if so hilight it
         hilite = False
         if gv.gui.get_highlight_moves():
-            lastmove = gv.jcchess.get_lastmove()
+            try:
+                lastmove = self.chessboard.peek()
+                #print(lastmove.from_square)
+            except IndexError:
+                lastmove = ""                
+            #lastmove = gv.jcchess.get_lastmove()
             if lastmove != "":
-                movesquares = []
-                src = lastmove[0:2]
-                dst = lastmove[2:4]
-                if src[1] != "*":
-                    movesquares.append(self.get_gs_square_posn(lastmove[0:2]))
-                movesquares.append(self.get_gs_square_posn(lastmove[2:4]))
-                if (x, y) in movesquares:
+                sqnum = jcchess.chess.square(x, y)
+                if sqnum in (lastmove.from_square, lastmove.to_square):
                     hilite = True
+                #print("cs=",jcchess.chess.square(x, y))
+                #lets = "abcdefgh"
+                #nums = "12345678"
+                #lastsrc = (lets.index(lastmove[0]), nums.index(lastmove[1]))
+                #lastdst = (lets.index(lastmove[2]), nums.index(lastmove[3])) 
+                #if (x, y) in (lastsrc, lastdst):
+                #    hilite = True
+                #    print("hilite true")
+                #movesquares = []
+                #src = lastmove[0:2]
+                #dst = lastmove[2:4]
+                #if src[1] != "*":
+                #    movesquares.append(self.get_gs_square_posn(lastmove[0:2]))
+                #movesquares.append(self.get_gs_square_posn(lastmove[2:4]))
+                #if (x, y) in movesquares:
+                #    hilite = True
 
         # clear square to square colour
         #gv.set_board_colours.set_square_colour(cr, a, LINEWIDTH, hilite)
@@ -425,10 +441,24 @@ class Board:
             r, g, b = 205/255, 133/255,  63/255
         else:
             #r, g, b = 1, 1, 1
-            r, g, b = 255/255, 222/255, 173/255    
-        cr.set_source_rgb(r, g, b)
-        cr.rectangle(1, 1 , a.width-LINEWIDTH, a.height-LINEWIDTH)
-        cr.fill()
+            r, g, b = 255/255, 222/255, 173/255
+        # modify it a bit to get r, g, b of hilite colour
+        #if hilite:
+        #    r -= 50/255
+        #    g -= 50/255
+        #    b -= 50/255
+        
+        if hilite:
+            cr.set_source_rgb(1, 0, 0)
+            cr.rectangle(1, 1 , a.width, a.height)
+            cr.fill()
+            cr.set_source_rgb(r, g, b)
+            cr.rectangle(3, 3, a.width-6, a.height-6)
+            cr.fill()
+        else:
+            cr.set_source_rgb(r, g, b)
+            cr.rectangle(1, 1 , a.width-LINEWIDTH, a.height-LINEWIDTH)
+            cr.fill()
         
         # set offset so piece is centered in the square
         cr.translate(a.width*(1.0-SCALE)/2.0, a.height*(1.0-SCALE)/2.0)

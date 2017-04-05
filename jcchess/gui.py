@@ -278,6 +278,8 @@ class Gui:
                 <separator/>
                 <menuitem action="CopyGame"/>
                 <menuitem action="PasteGame"/>
+                <separator/>
+                <menuitem action="Preferences"/>
             </menu>
             <menu action="Options">
                 <menuitem action="Undo"/>
