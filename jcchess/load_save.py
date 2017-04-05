@@ -113,8 +113,17 @@ class Load_Save:
         movecnt = 0
         movelist = []
         redolist = []
+        lastmove = ""
         startpos = "startpos"
-        gv.board.init_board()
+        # if there is a FEN use that as board start position 
+        # otherwise use standard start position
+        try:
+            fen = game.headers["FEN"]
+        except KeyError:
+            fen = "std"
+        if gv.verbose:
+            print("fen=",fen)
+        gv.board.init_board(fen)
         node = game
         while not node.is_end():
             next_node = node.variation(0)
