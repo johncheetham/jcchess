@@ -32,7 +32,6 @@ from .constants import VERSION
 
 # Copy the board position to the clipboard in std FEN format
 def copy_FEN_to_clipboard(action):
-    #sfen = gv.board.get_sfen()
     fen = gv.board.get_fen()
     copy_text_to_clipboard(fen)
 

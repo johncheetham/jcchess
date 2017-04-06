@@ -51,7 +51,10 @@ class Gui:
 
     def build_gui(self):
 
-        self.gobactive = False
+        self.gobactive = False        
+        glade_dir = gv.jcchess.get_glade_dir() 
+        self.promotion_glade_file = os.path.join(glade_dir, "promotion.glade")
+        self.promotion_piece = 'q'
         self.engine_debug = engine_debug.get_ref()
         self.engine_output = engine_output.get_ref()
         self.move_list = move_list.get_ref()
@@ -943,24 +946,47 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
     def enable_stop_button(self):
         self.stopbutton.set_sensitive(True)
 
+    def get_promotion_piece(self):
+        return self.promotion_piece
+        
     def promote_popup(self):
+        self.builder = Gtk.Builder()
+        self.builder.set_translation_domain(gv.domain)
+        self.builder.add_from_file(self.promotion_glade_file)
+        self.builder.connect_signals(self)
+        promotion_dialog = self.builder.get_object("promotion_dialog")
+        promotion_dialog.set_transient_for(gv.gui.get_window())
 
-        dialog = Gtk.Dialog(
-            _("Promotion"),
-            None,
-            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-            (_("Yes"), Gtk.ResponseType.YES,
-             _("No"), Gtk.ResponseType.NO,
-             _("Cancel"), Gtk.ResponseType.CANCEL))
+        response_cancel = 1
+        response_ok = 2
 
-        dialog.vbox.pack_start(Gtk.Label("\n" + _("Promote piece?") + "\n"), True, True, 0)
-
-        dialog.show_all()
-
-        response = dialog.run()
-        dialog.destroy()
-
-        return response
+        # If user hasn't clicked on OK then exit now
+        if promotion_dialog.run() != response_ok:
+            promotion_dialog.destroy()
+            # user cancelled so restore pieceset to what it was
+            #gv.board.use_pieceset(self.orig_pieceset)
+        else:
+            promotion_dialog.destroy()
+            
+            
+            
+    # callback for when promotion piecset radiobutton changed
+    def promotion_radio_button_changed(self, promotion_radio_button):
+        #if not promotion_radio_button.get_active():
+        #    return
+        name = promotion_radio_button.get_label()
+        if name == "Queen":
+            self.promotion_piece = "q"
+        elif name == "Rook":
+            self.promotion_piece = "r"
+        elif name == "Bishop":
+            self.promotion_piece = "b"
+        elif name == "Knight":
+            self.promotion_piece = "n"
+        else:
+            print("invalid promotion in promotion_radio_button_changed in "
+                  "gui.py:", name)
+            self.promotion_piece = "q"
 
     def update_toolbar(self, player):
         self.engines_lblw.set_markup("<b>" + player[WHITE][:25] + " </b>")
@@ -1222,7 +1248,6 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
     # save position and exit edit mode
     def end_edit(self):
         self.edit_mode = False
-        #sfen = gv.board.get_sfen()
         fen = gv.board.get_fen()
         load_save_ref = load_save.get_ref()
         load_save_ref.init_game(fen)      # update board to reflect edit

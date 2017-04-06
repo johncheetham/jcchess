@@ -36,18 +36,7 @@ LINEWIDTH = 2    # width of lines on the board
 class Board:
 
     def __init__(self):
-        #self.chessboard = chess.Board()
-        #print("self.chessboard=\n",self.chessboard)
-        #print(" ")
         self.init_board()
-        self.board_position = self.getboard()        
-        
-        #self.board_array= [[' ' for x in range(8)] for y in range(8)]
-        #print("self.board_position=",self.board_position)
-        #self.board_position= [' l', ' n', ' s', ' g', ' k', ' g', ' s', ' n', ' l', ' -', ' b', ' -', ' -', ' -', ' -', ' -', ' r', ' -', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' -', ' R', ' -', ' -', ' -', ' -', ' -', ' B', ' -', ' L', ' N', ' S', ' G', ' K', ' G', ' S', ' N', ' L']
-        #print("len=",len(self.board_position))
-        #self.board_position= [' r', ' n', ' b', ' q', ' k', ' b', ' n', ' r', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' R', ' N', ' B', ' Q', ' K', ' B', ' N', ' R']        
-        #print("len=",len(self.board_position))
         self.dnd = None        
 
     def init_board(self, fen="std"):
@@ -58,12 +47,6 @@ class Board:
         
     def build_board(self):
         GObject.idle_add(self.update)
-
-    def get_gs_loc(self, x, y):
-        #l = x + (8 - y) * 9
-        l = x + (7 - y) * 8
-        #l = x + y * 8
-        return l
 
     # convert jcchess co-ordinates for square into
     # standard notation (e.g.  (1, 0) -> b1)
@@ -79,91 +62,6 @@ class Board:
         x = lets.index(sq[0:1])
         y = int(sq[1:2]) - 1
         return x, y
-
-    #
-    # USI SFEN string
-    #
-    # uppercase letters for black pieces, lowercase letters for white pieces
-    #
-    # examples:
-    #     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1"
-    #     "8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w
-    # Sbgn3p 124"
-    def get_sfen(self):
-
-        empty = 0
-        sfen = ""
-
-        # board state
-        for y in range(8):
-            for x in range(8):
-                # convert the x, y square to the location value
-                # used by the engine
-                l = self.get_gs_loc(x, y)
-                p = self.board_position[l]
-                if p == " -":
-                    empty += 1
-                    continue
-                if empty != 0:
-                    sfen += str(empty)
-                    empty = 0
-                if p[1].isupper():
-                    usi_p = p[1].lower()
-                else:
-                    usi_p = p[1].upper()
-                if p[0] == "+":
-                    usi_p = "+" + usi_p
-                sfen += usi_p
-            if empty != 0:
-                sfen += str(empty)
-                empty = 0
-            if y != 8:
-                sfen += "/"
-
-        # side to move
-        if gv.jcchess.get_stm() == BLACK:
-            stm = "b"
-        else:
-            stm = "w"
-        sfen = sfen + " " + stm
-
-        # pieces in hand
-        pih = ""
-
-        # get list of captured pieces for black in the correct order
-        # (rook, bishop, gold, silver, knight, lance, pawn)
-        cap_list = []
-        for p in ("R", "B", "G", "S", "N", "L", "P"):
-            zcap = self.getcap(p, self.cap[BLACK])
-            if zcap != "":
-                cap_list.append(zcap)
-
-        # get list captured pieces for white in the correct order
-        # (rook, bishop, gold, silver, knight, lance, pawn)
-        for p in ("R", "B", "G", "S", "N", "L", "P"):
-            zcap = self.getcap(p, self.cap[WHITE])
-            if zcap != "":
-                # change to lower case for white
-                zcap2 = zcap[0] + zcap[1].lower()
-                cap_list.append(zcap2)
-
-        # cap_list is now a list of captured pieces in the correct order
-        # (black R, B, G, S, N, L, P followed by white R, B, G, S, N, L, P)
-
-        # create pices in hand string (pih) from cap_list
-        for c in cap_list:
-            piece = c[1:2]
-            num = c[0:1]
-            if int(num) > 1:
-                pih += str(num)
-            pih += piece
-
-        if pih == "":
-            pih = "-"
-
-        move_count = gv.jcchess.get_move_count()
-        sfen = sfen + " " + pih + " " + str(move_count)
-        return sfen
 
     def display_board(self):
         #
@@ -182,12 +80,7 @@ class Board:
 
     #
     def valid_source_square(self, x, y, stm):
-        #l = self.get_gs_loc(x, y)
-        #piece = self.board_position[l]
         piece = self.get_piece(x, y)
-        #print("jjjpiece=",x,y,piece)
-        #print("piece=",piece)
-        #print("stm=",stm)
         pieces = [
             [
                "r", "n", "b", "q", "k", "p"
@@ -254,83 +147,7 @@ class Board:
         gv.pieces.set_pieceset(pieceset)
         self.refresh_screen()
 
-    def getboard(self):
-        
-        b = []
-        
-        for x in self.chessboard.fen(): 
-            """
-            if x == "R":
-                b.append(' r')
-            elif  x == "N":
-                b.append(' n')
-            elif x == "B":
-                b.append(' b')
-            elif  x == "Q":
-                b.append(' q')
-            elif  x == "K":
-                b.append(' k')
-            elif  x == "P":
-                b.append(' p')
-            elif x == "r":
-                b.append(' R')
-            elif  x == "n":
-                b.append(' N')
-            elif x == "b":
-                b.append(' B')
-            elif  x == "q":
-                b.append(' Q')
-            elif  x == "k":
-                b.append(' K')
-            elif  x == "p":
-                b.append(' P')
-            elif x.isdigit():
-                for y in range(int(x)):
-                    b.append(' -')
-            elif x == " ":
-                break
-            
-            """
-            if x == "R":
-                b.append(' R')
-            elif  x == "N":
-                b.append(' N')
-            elif x == "B":
-                b.append(' B')
-            elif  x == "Q":
-                b.append(' Q')
-            elif  x == "K":
-                b.append(' K')
-            elif  x == "P":
-                b.append(' P')
-            elif x == "r":
-                b.append(' r')
-            elif  x == "n":
-                b.append(' n')
-            elif x == "b":
-                b.append(' b')
-            elif  x == "q":
-                b.append(' q')
-            elif  x == "k":
-                b.append(' k')
-            elif  x == "p":
-                b.append(' p')
-            elif x.isdigit():
-                for y in range(int(x)):
-                    b.append(' -')
-            elif x == " ":
-                break  
-                  
-        #print("b=",b)
-        if len(b) != 64:
-            print("Length error in getboard")                    
-        #return [' r', ' n', ' b', ' q', ' k', ' b', ' n', ' r', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' R', ' N', ' B', ' Q', ' K', ' B', ' N', ' R'] 
-        #print([' R', ' N', ' B', ' Q', ' K', ' B', ' N', ' R', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' P', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' -', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' p', ' r', ' n', ' b', ' q', ' k', ' b', ' n', ' r']       )
-        #return engine.getboard()
-        return b
-
     def update(self, refresh_gui=True):
-        self.board_position = self.getboard()
         if refresh_gui:
             self.refresh_screen()
 
@@ -343,8 +160,6 @@ class Board:
     #
     def get_piece_pixbuf(self, x, y):
         # convert the x, y square to the location value used by the engine
-        #l = self.get_gs_loc(x, y)
-        #piece = self.board_position[l]
         piece = self.get_piece(x, y)
         pb = gv.pieces.getpixbuf(piece)
         a = gv.gui.get_event_box(x, y).get_allocation()
@@ -354,8 +169,6 @@ class Board:
 
     def get_piece_pixbuf_unscaled(self, x, y):
         # convert the x, y square to the location value used by the engine
-        l = self.get_gs_loc(x, y)                
-        #piece = self.board_position[l]
         piece = self.get_piece(x, y)
         pb = gv.pieces.getpixbuf(piece)
         return pb
@@ -373,27 +186,22 @@ class Board:
     # called from gui.py when editing the board position to set the piece
     # on a square.
     def set_piece_at_square(self, x, y, piece, colour):
-        print("pppiece=",piece)
-        #self.chessboard.set_piece_at(square, piece, promoted=False)
-        self.chessboard.set_piece_at(chess.square(x, y), chess.Piece(piece, colour))
-        print("pieceat=",self.chessboard.piece_at(chess.square(x, y)))
-        #l = self.get_gs_loc(x, y)
-        #self.board_position = self.getboard()
-        #self.board_position[l] = piece
-        #self.update()        
+        self.chessboard.set_piece_at(chess.square(x, y), chess.Piece(piece, colour))       
         GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
+        
+    # called from gui.py to remove piece during promotion dialog
+    def remove_piece_at_square(self, x, y):
+        piece=self.chessboard.remove_piece_at(chess.square(x, y))       
+        GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
+        return piece
 
     # called when user does a "clear board" in board edit
     def clear_board(self):
         self.chessboard.clear()
         self.update()
-        #for x in range(8):
-        #    for y in range(8):
-        #        self.set_square_as_unoccupied(x, y)
 
     def set_image_cairo(self, x, y, cr=None, widget=None):
         piece = self.get_piece(x, y)
-        #print("xxxxxxxx,y=",x,y,piece)
 
         if cr is None:
             w = gv.gui.get_event_box(x, y).get_window()
@@ -478,14 +286,7 @@ class Board:
         cr.paint()
 
     def get_piece(self, x, y):
-        #l = self.get_gs_loc(x, y)
-        #piece = self.board_position[l]
-        #print("x,yyyyy=",x,y,piece)
         piece = self.chessboard.piece_at(chess.square(x, y))
-        #if piece == None:
-        #    piece = " "
-        #else:
-        #    piece = str(piece) 
         piece = str(piece)   
         return piece
 
@@ -499,7 +300,6 @@ class Board:
         self.chessboard.pop()
         
     def print_board(self):
-        #engine.command("bd")
         print("board fen:",repr(self.chessboard))
         print("board:\n",self.chessboard)
         

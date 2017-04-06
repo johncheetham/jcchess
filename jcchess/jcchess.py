@@ -234,34 +234,22 @@ class Game:
             print("dst_y=", dst_y)
 
         move = self.src + dst
-        # check for promotion
-        """
-        if self.promotion_zone(src, dst, self.stm):
-            promote = gv.board.promote(piece, src_x, src_y, dst_x, dst_y,
-                                       self.stm)
-            if (promote == 2):
-                # must promote
-                move = move + "+"
-            elif (promote == 1):
-                # promotion is optional
-                #
-                # But always prompt before promoting a silver since it
-                # can be valuable to have an unpromoted silver on the
-                # opposite side of the board.
-                if self.ask_before_promoting or piece == " s" or piece == " S":
-                    response = gv.gui.promote_popup()
-                    if (response == Gtk.ResponseType.CANCEL):
-                        return None
-                    if (response == Gtk.ResponseType.YES):
-                        move = move + "+"
-                else:
-                    move = move + "+"
-        """
+        # check for promotion 
+        piece = gv.board.get_piece(src_x, src_y)
+
+        if dst[1] in ('1', '8') and piece.lower() == 'p':
+            # remove piece during dialog
+            #piece = gv.board.remove_piece_at_square(src_x, src_y)
+            gv.gui.promote_popup()
+            # reinstate piece
+            #gv.board.set_piece_at_square(src_x, src_y, piece.piece_type, piece.color)
+            move += gv.gui.get_promotion_piece()     
+
         if gv.verbose:
             print("move=", move)
  
         cmove = chess.Move.from_uci(move)
-        validmove = cmove in gv.board.get_legal_moves() 
+        validmove = cmove in gv.board.get_legal_moves()
         if (not validmove):
             # illegal move
             gv.gui.set_status_bar_msg(_("Illegal Move"))
@@ -614,27 +602,6 @@ class Game:
 
     def set_promotion_mode(self, mode):
         self.ask_before_promoting = mode
-    
-    
-
-    def promotion_zone(self, src, dst, stm):
-        srclet = src[1:2]
-        dstlet = dst[1:2]
-
-        # can't promote dropped pieces
-        if srclet == "*":
-            return False
-
-        if stm == BLACK:
-            if (srclet < "d" and srclet != "*") or dstlet < "d":
-                return True
-            else:
-                return False
-        else:
-            if (srclet > "f" and srclet != "*") or dstlet > "f":
-                return True
-            else:
-                return False
 
     #
     # Callback Functions
