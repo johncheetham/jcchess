@@ -25,7 +25,7 @@ from . import constants
 from . import gv
 from . import move_list
 from . import comments
-import jcchess.chess.pgn
+import chess.pgn
 from .constants import WHITE, BLACK,  VERSION,  NAME
 
 
@@ -91,7 +91,7 @@ class Load_Save:
                 #print(gv.gamedate)
             #self.load_game(fname)
             f = open(fname)
-            first_game = jcchess.chess.pgn.read_game(f)
+            first_game = chess.pgn.read_game(f)
             f.close()
             self.load_game_pgn(first_game)
             return
@@ -100,7 +100,7 @@ class Load_Save:
 
     #def load_game(self, fname):
     #    pgn = open(fname)
-    #    first_game = jcchess.chess.pgn.read_game(pgn)
+    #    first_game = chess.pgn.read_game(pgn)
     #    pgn.close()
     #    self.load_game_pgn(first_game)
         
@@ -399,7 +399,7 @@ class Load_Save:
                     return
                     
             if filename.endswith(".pgn"):                
-                #game = jcchess.chess.pgn.Game.from_board(gv.jcchess.get_board())
+                #game = chess.pgn.Game.from_board(gv.jcchess.get_board())
                 game = gv.board.get_game()
                 #print("game=",game)                
                 f = open(filename, "w",)

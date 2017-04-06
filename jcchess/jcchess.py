@@ -36,7 +36,7 @@ import pickle
 import time
 from datetime import date
 
-from . import chess
+import chess
 from . import gv
 from . import utils
 from . import gui

@@ -22,7 +22,7 @@ from gi.repository import Gdk
 import os
 import sys
 import pickle
-import jcchess.chess.pgn
+import chess.pgn
 from io import StringIO
 
 from . import load_save
@@ -101,7 +101,7 @@ def paste_game_from_clipboard(action):
     #psn_ref = psn.get_ref()
     #psn_ref.load_game_psn_from_str(gamestr)
     pgn = StringIO(gamestr)
-    game = jcchess.chess.pgn.read_game(pgn)
+    game = chess.pgn.read_game(pgn)
     load_save_ref = load_save.get_ref()
     load_save_ref.load_game_pgn(game)
 

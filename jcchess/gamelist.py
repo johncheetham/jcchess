@@ -19,8 +19,6 @@
 
 from gi.repository import Gtk
 import os
-
-import jcchess.chess.pgn
 from . import gv
 
 

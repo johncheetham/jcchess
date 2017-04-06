@@ -28,6 +28,5 @@ include jcchess/glade/engine_debug.glade
 include jcchess/glade/move_list.glade
 include jcchess/glade/engine_output.glade
 include jcchess/glade/preferences.glade
-include jcchess/chess/__init__.py
 include locale/jcchess.pot
 include locale/*/LC_MESSAGES/*.po

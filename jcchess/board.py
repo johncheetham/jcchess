@@ -24,8 +24,8 @@ from gi.repository import GdkPixbuf
 from gi.repository import GLib
 import cairo
 
-from . import chess
-import jcchess.chess.pgn
+import chess
+import chess.pgn
 from . import gv
 from .constants import WHITE, BLACK
 
@@ -255,13 +255,10 @@ class Board:
         self.refresh_screen()
 
     def getboard(self):
-        #print("gv.jcchess.chessboard=",repr(gv.jcchess.chessboard))
-        #print("gv.jcchess.chessboard=\n",gv.jcchess.chessboard)
         
         b = []
         
-        for x in self.chessboard.fen():
-            #print(x)
+        for x in self.chessboard.fen(): 
             """
             if x == "R":
                 b.append(' r')
@@ -418,10 +415,9 @@ class Board:
                 lastmove = ""                
             #lastmove = gv.jcchess.get_lastmove()
             if lastmove != "":
-                sqnum = jcchess.chess.square(x, y)
+                sqnum = chess.square(x, y)
                 if sqnum in (lastmove.from_square, lastmove.to_square):
-                    hilite = True
-                #print("cs=",jcchess.chess.square(x, y))
+                    hilite = True 
                 #lets = "abcdefgh"
                 #nums = "12345678"
                 #lastsrc = (lets.index(lastmove[0]), nums.index(lastmove[1]))
@@ -485,9 +481,7 @@ class Board:
         #l = self.get_gs_loc(x, y)
         #piece = self.board_position[l]
         #print("x,yyyyy=",x,y,piece)
-        #print(gv.jcchess.chessboard.piece_at(chess.square(x, y)))
         piece = self.chessboard.piece_at(chess.square(x, y))
-        #piece = gv.jcchess.chessboard.piece_at(chess.square(x, 7-y))
         #if piece == None:
         #    piece = " "
         #else:
@@ -528,7 +522,7 @@ class Board:
         return self.chessboard.parse_san(move)
         
     def get_game(self):
-        game = jcchess.chess.pgn.Game.from_board(self.chessboard)         
+        game = chess.pgn.Game.from_board(self.chessboard)         
         del game.headers["Event"]
         del game.headers["Site"]
         del game.headers["Date"]

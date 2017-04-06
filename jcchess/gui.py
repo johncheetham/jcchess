@@ -35,7 +35,7 @@ from . import load_save
 from . import utils
 from . import gamelist
 from . import comments
-from . import chess
+import chess
 from .constants import WHITE, BLACK, NAME, VERSION, TARGET_TYPE_TEXT
 from . import gv
 

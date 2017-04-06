@@ -12,14 +12,10 @@ assert sys.version_info >= (3,0)
 
 VERSION = jcchess.constants.VERSION
 
-if os.name == "nt":
-    # windows
-    data_files=[]
-else:
-    # linux
-    data_files=[
-      (sys.prefix+'/share/applications',['jcchess.desktop']),
-      (sys.prefix+'/share/pixmaps', ['jcchess.png'])]
+# linux
+data_files=[
+  (sys.prefix+'/share/applications',['jcchess.desktop']),
+  (sys.prefix+'/share/pixmaps', ['jcchess.png'])]
 
 package_data_list = []
 
