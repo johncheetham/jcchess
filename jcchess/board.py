@@ -77,8 +77,6 @@ class Board:
     # test if user has clicked on a valid source square
     # i.e. one that contains a black piece if side to move is black
     #      otherwise white piece
-
-    #
     def valid_source_square(self, x, y, stm):
         piece = self.get_piece(x, y)
         pieces = [
@@ -96,52 +94,6 @@ class Board:
             return False
 
         return True
-
-#
-# Check if promotion is mandatory (i.e on last rank of board for
-# pawn/lance or last 2 ranks for knight) or optional
-#
-# return
-# 0 - no promotion
-# 1 - promotion optional
-# 2 - promotion mandatory
-#
-    def promote(self, piece, src_x, src_y, dst_x, dst_y, stm):
-
-        # check for mandatory
-        if stm == BLACK:
-            if (dst_y == 0):
-                if (piece == " p" or piece == " l" or piece == " n"):
-                    return 2
-            elif (dst_y == 1):
-                if (piece == " n"):
-                    return 2
-        else:
-            if (dst_y == 8):
-                if (piece == " P" or piece == " L" or piece == " N"):
-                    return 2
-            elif (dst_y == 7):
-                if (piece == " N"):
-                    return 2
-
-        # check for optional
-        #        BlackPawn,    BlackLance,   BlackKnight, BlackSilver,
-        #        BlackBishop,  BlackRook,
-        promotable_pieces = [
-            [
-                " p", " l", " n", " s", " b", " r"
-            ],
-            [
-                " P", " L", " N", " S", " B", " R"
-            ]
-        ]
-
-        try:
-            idx = promotable_pieces[stm].index(piece)
-        except ValueError as ve:
-            return 0
-
-        return 1
 
     def use_pieceset(self, pieceset):
         gv.pieces.set_pieceset(pieceset)
@@ -218,29 +170,12 @@ class Board:
         if gv.gui.get_highlight_moves():
             try:
                 lastmove = self.chessboard.peek()
-                #print(lastmove.from_square)
             except IndexError:
-                lastmove = ""                
-            #lastmove = gv.jcchess.get_lastmove()
+                lastmove = ""
             if lastmove != "":
                 sqnum = chess.square(x, y)
                 if sqnum in (lastmove.from_square, lastmove.to_square):
-                    hilite = True 
-                #lets = "abcdefgh"
-                #nums = "12345678"
-                #lastsrc = (lets.index(lastmove[0]), nums.index(lastmove[1]))
-                #lastdst = (lets.index(lastmove[2]), nums.index(lastmove[3])) 
-                #if (x, y) in (lastsrc, lastdst):
-                #    hilite = True
-                #    print("hilite true")
-                #movesquares = []
-                #src = lastmove[0:2]
-                #dst = lastmove[2:4]
-                #if src[1] != "*":
-                #    movesquares.append(self.get_gs_square_posn(lastmove[0:2]))
-                #movesquares.append(self.get_gs_square_posn(lastmove[2:4]))
-                #if (x, y) in movesquares:
-                #    hilite = True
+                    hilite = True
 
         # clear square to square colour
         #gv.set_board_colours.set_square_colour(cr, a, LINEWIDTH, hilite)
@@ -315,9 +250,6 @@ class Board:
     #    else:
     #        return False
             
-    #def get_board(self):
-    #    return self.chessboard                
-
     def parse_san(self, move):
         return self.chessboard.parse_san(move)
         

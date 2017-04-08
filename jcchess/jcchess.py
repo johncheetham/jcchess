@@ -1128,9 +1128,6 @@ class Game:
     def get_redolist(self):
         return self.redolist
 
-    def get_lastmove(self):
-        return self.lastmove
-
     def set_lastmove(self, lastmove):
         self.lastmove = lastmove
 

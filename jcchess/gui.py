@@ -630,7 +630,7 @@ class Gui:
         self.actiongroup.get_action("MoveNow").set_sensitive(False)
 
         self.window.show_all()
-        self.side_to_move[WHITE].hide()
+        self.side_to_move[BLACK].hide()
         self.gobutton.set_sensitive(False)
         self.stopbutton.set_sensitive(False)
 
