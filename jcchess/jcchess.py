@@ -648,52 +648,14 @@ class Game:
         #engine.command("new")
         gv.board.init_board()
         if menu_name == "NewGame":
-            # Normal Game (No handicap)
+            # Normal Game
             self.startpos = "startpos"
             self.start_stm = WHITE
         else:
-            # Handicap Game
-            self.start_stm = WHITE
-            if menu_name == "LanceHandicap":
-                sfen = "lnsgkgsn1/1r5b1/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "BishopHandicap":
-                sfen = "lnsgkgsnl/1r7/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "RookHandicap":
-                sfen = "lnsgkgsnl/7b1/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "RookandLanceHandicap":
-                sfen = "lnsgkgsn1/7b1/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "TwoPieceHandicap":
-                sfen = "lnsgkgsnl/9/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "FourPieceHandicap":
-                sfen = "1nsgkgsn1/9/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "SixPieceHandicap":
-                sfen = "2sgkgs2/9/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "EightPieceHandicap":
-                sfen = "3gkg3/9/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "TenPieceHandicap":
-                sfen = "4k4/9/ppppppppp/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w - 1"
-            elif menu_name == "ThreePawnHandicap":
-                sfen = "4k4/9/9/9/9/9/" \
-                       "PPPPPPPPP/1B5R1/LNSGKGSNL w 3p - 1"
-            else:
-                gv.gui.info_box("Error. Invalid menu name:" + menu_name)
-                return
-
-            #engine.setfen(sfen)
-            self.startpos = sfen
+            gv.gui.info_box("Error. Invalid menu name:" + menu_name)
+            return
 
         gv.board.update()
-        # update move list in move list window
-        self.move_list.update()
         # clean comments (bugfix)
         self.move_list.comments.clear_comments()
         #if not BEEP:
@@ -704,6 +666,8 @@ class Game:
         self.movelist = []
         self.redolist = []
         self.lastmove = ""
+        # update move list in move list window
+        self.move_list.update()
         #clear comment-and move windows
         #self.move_list.comments.automatic_comment("") # just a  Test
         #print("test")
@@ -1074,8 +1038,9 @@ class Game:
     def get_side_to_move(self):
 
         # get side to move for the first move of the game
-        # This is black in a normal game and white in a handicap game
-        start_stm = self.get_stm_from_sfen(self.startpos)
+        # This is white for standard start position but may
+        # be different with a fen
+        start_stm = self.get_stm_from_fen(self.startpos)
 
         if len(self.movelist) % 2 == 0:
             return start_stm
@@ -1088,12 +1053,12 @@ class Game:
         else:
             return _("white")
 
-    def get_stm_from_sfen(self, sfen):
-        if sfen == "startpos":
+    def get_stm_from_fen(self, fen):
+        if fen == "startpos":
             # normal game
             stm = WHITE
         else:
-            sp = sfen.split()
+            sp = fen.split()
             try:
                 if sp[1] == "w":
                     stm = WHITE

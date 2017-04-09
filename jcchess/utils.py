@@ -22,6 +22,7 @@ from gi.repository import Gdk
 import os
 import sys
 import pickle
+import chess
 import chess.pgn
 from io import StringIO
 
@@ -42,48 +43,18 @@ def paste_clipboard_to_FEN(action):
     if fen is None:
         gv.gui.info_box("Error: invalid fen")
         return
-    #if not validate_sfen(sfen):
-    #    gv.gui.info_box("Error: invalid fen")
-    #    return
+        
+    # check the fen is valid    
+    try:
+        chessboard = chess.Board(fen)
+    except ValueError as ve:
+        print("Error - Pasted fen invalid: "+str(ve))
+        print("Error - FEN data:",fen) 
+        gv.gui.info_box("Error: invalid fen")
+        return
     load_save_ref = load_save.get_ref()
     load_save_ref.init_game(fen)
-
-
-# lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1
-def validate_sfen(sfen):
-    sfenlst = sfen.split()
-    num_words = len(sfenlst)
-    if num_words != 3 and num_words != 4:
-        return False
-
-    if num_words == 3:
-        board_state, side_to_move, pieces_in_hand = sfenlst
-        move_count = "1"
-    else:
-        board_state, side_to_move, pieces_in_hand, move_count = sfenlst
-
-    # board_state
-    ranks = board_state.split("/")
-    if len(ranks) != 9:
-        print("board state does not have 9 ranks")
-        return False
-
-    # side_to_move
-    if side_to_move != "w" and side_to_move != "b":
-        print("invalid side to move")
-        return False
-
-    # pieces in hand
-
-    # Move Count
-    try:
-        mc = int(move_count)
-    except ValueError:
-        print("invalid move count")
-        return False
-
-    return True
-
+    
 
 def copy_game_to_clipboard(action):
     #load_save_ref = load_save.get_ref()

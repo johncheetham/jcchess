@@ -254,7 +254,20 @@ class Board:
         return self.chessboard.parse_san(move)
         
     def get_game(self):
-        game = chess.pgn.Game.from_board(self.chessboard)         
+        
+        # if the movelist is positioned part way through the game then
+        # we must redo all moves to get the full game
+        redo_count = len(gv.jcchess.get_redolist())
+        for i in range(0, redo_count):
+            gv.jcchess.redo_move()
+        
+        game = chess.pgn.Game.from_board(self.chessboard)
+        
+        # if we did any redo moves then undo them now to get things back
+        # the way they were
+        for i in range(0, redo_count):
+            gv.jcchess.undo_move()
+            
         del game.headers["Event"]
         del game.headers["Site"]
         del game.headers["Date"]

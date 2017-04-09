@@ -106,7 +106,7 @@ class Load_Save:
         
     def load_game_pgn(self, game):    
         stm = WHITE
-        movecnt = 0
+        moveno = 1
         movelist = []
         redolist = []
         lastmove = ""
@@ -133,10 +133,15 @@ class Load_Save:
                 print("move=", move)
                 print("type=",type(move))
             gv.board.add_move(move)
-            movecnt += 1
             smove = str(move)                
             movelist.append(smove)
             lastmove = smove
+            
+            # add comment for this move if present
+            if node.comment != "":
+                self.comments.set_comment(moveno, node.comment)
+                        
+            moveno += 1
             if gv.verbose:
                 gv.board.print_board()
             node = next_node
@@ -241,7 +246,6 @@ class Load_Save:
     # this routine is called from utils.py (when doing paste position)
     # and from gui.py (when ending an edit board session).
     def init_game(self, fen):
-        #engine.setfen(sfen)
         gv.board.init_board(fen)
         startpos = fen
         #fenlst = fen.split()
@@ -398,10 +402,23 @@ class Load_Save:
                     dialog.destroy()
                     return
                     
-            if filename.endswith(".pgn"):                
-                #game = chess.pgn.Game.from_board(gv.jcchess.get_board())
+            if filename.endswith(".pgn"):
+                    
                 game = gv.board.get_game()
-                #print("game=",game)                
+
+                # add comments
+                moveno = 1    
+                node = game
+                while not node.is_end():
+                    next_node = node.variation(0)                                              
+                    # add comment for this move if present
+                    comment = self.comments.get_comment(moveno)
+                    if comment != "":
+                        node.comment = comment 
+                    node = next_node
+                    moveno += 1                
+                   
+                # write game to file                
                 f = open(filename, "w",)
                 print(game, file=f, end="\n\n")
                 f.close()
