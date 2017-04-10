@@ -123,7 +123,13 @@ class Move_List:
                     cind = "..."
                 else:
                     cind = " "
-                e = str(moveno) + ".", move, cind
+                if moveno % 2 == 1:
+                    strmoveno = str(int((moveno + 1) / 2)) + "."
+                else:
+                    strmoveno = ""
+                    
+                #e = str(moveno) + ".", move, cind
+                e = strmoveno, move, cind
                 e1 = str(moveno) + "." + " " + move +" " + cind #+"\n"
                 le = []
                 le.append(e1)
@@ -201,9 +207,15 @@ class Move_List:
     def process_tree_selection(self):
         (treemodel, treeiter) = self.tree_selection.get_selected()
         if treeiter is not None:
-            move_str = treemodel.get_value(treeiter, 0)
-            move_str = move_str[0: len(move_str) - 1]
-            move_idx = int(move_str)
+            
+            # get the selected row number
+            path = treemodel.get_path(treeiter)
+            move_idx = path.get_indices()[0]
+            
+            #move_str = treemodel.get_value(treeiter, 0)
+            #move_str = move_str[0: len(move_str) - 1]
+            #move_idx = int(move_str)
+            
             self.comments.set_moveno(move_idx)
             # now call a method in jcchess.py to position it at the move
             # clicked on

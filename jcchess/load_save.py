@@ -106,7 +106,7 @@ class Load_Save:
         
     def load_game_pgn(self, game):    
         stm = WHITE
-        moveno = 1
+        moveno = 0
         movelist = []
         redolist = []
         lastmove = ""
@@ -118,6 +118,7 @@ class Load_Save:
         except KeyError:
             fen = "std"
         if gv.verbose:
+            print("game=",game)
             print("fen=",fen)
         gv.board.init_board(fen)
         node = game
@@ -407,7 +408,7 @@ class Load_Save:
                 game = gv.board.get_game()
 
                 # add comments
-                moveno = 1    
+                moveno = 0    
                 node = game
                 while not node.is_end():
                     next_node = node.variation(0)                                              

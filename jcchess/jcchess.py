@@ -573,7 +573,8 @@ class Game:
                     self.move_list.comments.automatic_comment(self.cmove + _(msg + gmsg),len(self.movelist))
                     return
 
-                msg = self.get_side_to_move_string(self.stm) + ": " + str(len(self.movelist)) + ". " + msg                             
+                #msg = self.get_side_to_move_string(self.stm) + ": " + str(len(self.movelist)) + ". " + msg
+                msg = self.get_side_to_move_string(self.stm) + ": " + msg                             
                 GLib.idle_add(gv.gui.set_status_bar_msg, msg)
 
             self.thinking = False
@@ -819,7 +820,15 @@ class Game:
             gv.event = "##"
             gv.gote = ""
             gv.sente = ""
-                
+
+    # called from this module and from comments.py
+    def convert_move(self, moveno):
+        if moveno % 2 == 1:
+            strmoveno = str(int((moveno + 1) / 2)) + "."
+        else:
+            strmoveno = str(int((moveno + 1) / 2)) + "..." 
+        return strmoveno
+        
     def goto_move(self, move_idx):
         try:
             gv.ucib.stop_engine()
@@ -848,7 +857,7 @@ class Game:
             pass
 
         if move is not None:
-            gv.gui.set_status_bar_msg(str(move_idx) +"." +move)
+            gv.gui.set_status_bar_msg(self.convert_move(move_idx)+move)
             if gv.show_moves == True:
                nmoves = len(self.movelist)
                path =(nmoves-1,)
@@ -889,11 +898,9 @@ class Game:
         self.goto_move(len(self.movelist))
         nmove = len(self.movelist) 
         if move is not None:
-            gv.gui.set_status_bar_msg("back: (" + str(nmove) + ". " + move + ")")
-     
-          
-                   
-                   
+            #gv.gui.set_status_bar_msg("back: (" + self.convert_move(nmove) + move + ")")
+            gv.gui.set_status_bar_msg("back: (" + move + ")")
+
     # undo a move without updating the gui
     def undo_move(self):
         gv.board.remove_move()
@@ -968,7 +975,8 @@ class Game:
         self.goto_move(len(self.movelist))
         nmove = len(self.movelist)
         if move is not None:
-           gv.gui.set_status_bar_msg("forward: (" + str(nmove) + ". " + move + ")")
+           #gv.gui.set_status_bar_msg("forward: (" + str(nmove) + ". " + move + ")")
+           gv.gui.set_status_bar_msg("forward: (" + move + ")")
             
     # redo a move without updating the gui
     def redo_move(self):
@@ -1013,7 +1021,8 @@ class Game:
             
 
         if move is not None:
-            gv.gui.set_status_bar_msg(" (" + str(nmove) + ". " + move + ")")
+            #gv.gui.set_status_bar_msg(" (" + str(nmove) + ". " + move + ")")
+            gv.gui.set_status_bar_msg(" (" + move + ")")
             self.lastmove = move
             #Lists?         
 

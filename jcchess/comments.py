@@ -94,7 +94,7 @@ class Comments:
             gv.gui.comment_view.get_buffer().insert(start,text)
 
         # show the moveno the comment relates to in the window title
-        self.window.set_title(_("Comment for Move ") + str(moveno))
+        self.window.set_title(_("Comment for Move ") + gv.jcchess.convert_move(moveno))
 
         # self.moveno = moveno
     def get_comment_text(self,moveno):
