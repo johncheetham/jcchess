@@ -1325,27 +1325,36 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         cr.set_font_size(font_size)
         
         
-        let = "abcdefghi"        
+        let = "abcdefgh"        
         xpos = int((widget.get_allocation().width - tb_width) / 2) + int(sq_size / 2)
-        ypos = 14                
-        # show co-ordinate letters above the board
+        ypos1 = 14
+        ypos2 = a.height - 7
+        # show co-ordinate letters above and below the board
         for num in range(1, 9):
-            cr.move_to(xpos, ypos) 
+            # top of board
+            cr.move_to(xpos, ypos1)
+            cr.show_text(let[num - 1])
+            # bottom of board
+            cr.move_to(xpos, ypos2)
             cr.show_text(let[num - 1])
             xpos = xpos + sq_size
         
-        # show co-ordinate numbers to right of board
+        # show co-ordinate numbers to left and right of the board
         # xpos = event.area.x + event.area.width - 14
         # xpos = widget.get_allocation().x = widget.get_allocation().width -14
-        xpos = widget.get_allocation().width - 14
+        xpos1 = 7
+        xpos2 = widget.get_allocation().width - 14
         # ypos = event.area.y + (
         #   event.area.height - tb_height) / 2 + sq_size / 2
         # ypos = widget.get_allocation().y + (
         #   widget.get_allocation().height - tb_height) / 2 + sq_size / 2
         ypos = int((widget.get_allocation().height - tb_height) / 2) + int(sq_size / 2)
-        let = "abcdefghi"
         for num in range(1, 9):
-            cr.move_to(xpos, ypos)
+            # left hand side of board
+            cr.move_to(xpos1, ypos)
+            cr.show_text(str(9 - num))
+            # right hand side of board
+            cr.move_to(xpos2, ypos)
             cr.show_text(str(9 - num))
             ypos = ypos + sq_size
 
