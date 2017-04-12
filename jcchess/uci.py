@@ -404,6 +404,10 @@ class Uci:
                     # update time for last move
                     GObject.idle_add(gv.tc.update_clock)
                     GObject.idle_add(gv.gui.set_side_to_move, side_to_move)
+                    # Allow above update_clock to complete
+                    # This must complete before we do start_clock for 
+                    # human in jcchess.py  
+                    time.sleep(0.1)
 
                     return bestmove, self.ponder_move
             self.op = []
