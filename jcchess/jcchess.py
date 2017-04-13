@@ -876,6 +876,7 @@ class Game:
     def undo_single_move(self, b):
         
         move = None
+        nmove = len(self.movelist)
         try:
             move = self.movelist.pop()
             gv.board.remove_move()
@@ -896,10 +897,9 @@ class Game:
         # set move list window to last move
         self.move_list.set_move(len(self.movelist))
         self.goto_move(len(self.movelist))
-        nmove = len(self.movelist) 
         if move is not None:
-            #gv.gui.set_status_bar_msg("back: (" + self.convert_move(nmove) + move + ")")
-            gv.gui.set_status_bar_msg("back: (" + move + ")")
+            gv.gui.set_status_bar_msg("back: (" + self.convert_move(nmove) + move + ")")
+            #gv.gui.set_status_bar_msg("back: (" + move + ")")
 
     # undo a move without updating the gui
     def undo_move(self):
@@ -975,8 +975,8 @@ class Game:
         self.goto_move(len(self.movelist))
         nmove = len(self.movelist)
         if move is not None:
-           #gv.gui.set_status_bar_msg("forward: (" + str(nmove) + ". " + move + ")")
-           gv.gui.set_status_bar_msg("forward: (" + move + ")")
+           gv.gui.set_status_bar_msg("forward: (" + self.convert_move(nmove) + move + ")")
+           #gv.gui.set_status_bar_msg("forward: (" + move + ")")
             
     # redo a move without updating the gui
     def redo_move(self):
@@ -1016,15 +1016,12 @@ class Game:
         try:
             move = self.movelist[len(self.movelist) - 1]
         except IndexError:
-            pass
-       
-            
+            pass            
 
         if move is not None:
-            #gv.gui.set_status_bar_msg(" (" + str(nmove) + ". " + move + ")")
-            gv.gui.set_status_bar_msg(" (" + move + ")")
+            gv.gui.set_status_bar_msg(" (" + self.convert_move(nmove) + move + ")")
+            #gv.gui.set_status_bar_msg(" (" + move + ")")
             self.lastmove = move
-            #Lists?         
 
     def set_movelist(self, movelist):
         self.movelist = movelist
