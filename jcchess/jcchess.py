@@ -205,6 +205,8 @@ class Game:
             self.src_x = x
             self.src_y = y
             self.piece = gv.board.get_piece(x, y)
+            # hilite square clicked on
+            gv.board.update((chess.square(x, y),))
             return
 
         # must have a valid source square before checking dest square
