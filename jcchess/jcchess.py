@@ -239,13 +239,18 @@ class Game:
         # check for promotion 
         piece = gv.board.get_piece(src_x, src_y)
 
-        if dst[1] in ('1', '8') and piece.lower() == 'p':
-            # remove piece during dialog
-            #piece = gv.board.remove_piece_at_square(src_x, src_y)
-            gv.gui.promote_popup()
-            # reinstate piece
-            #gv.board.set_piece_at_square(src_x, src_y, piece.piece_type, piece.color)
-            move += gv.gui.get_promotion_piece()     
+        # if moving pawn to end rank then show promotion dialog
+        if (piece == 'P' and src[1] == '7' and dst[1] == '8') or \
+           (piece == 'p' and src[1] == '2' and dst[1] == '1'):
+            testmove = chess.Move.from_uci(move+'q')
+            validmove = testmove in gv.board.get_legal_moves()
+            if validmove:
+                # remove piece during dialog
+                #piece = gv.board.remove_piece_at_square(src_x, src_y)
+                gv.gui.promote_popup()
+                # reinstate piece
+                #gv.board.set_piece_at_square(src_x, src_y, piece.piece_type, piece.color)
+                move += gv.gui.get_promotion_piece()
 
         if gv.verbose:
             print("move=", move)
@@ -878,6 +883,7 @@ class Game:
     def undo_single_move(self, b):
         
         move = None
+        m=None
         nmove = len(self.movelist)
         try:
             move = self.movelist.pop()
@@ -899,7 +905,11 @@ class Game:
         # set move list window to last move
         self.move_list.set_move(len(self.movelist))
         self.goto_move(len(self.movelist))
-        gv.board.update((m.from_square, m.to_square))
+        if m is not None:
+            squares_to_hilite=(m.from_square, m.to_square)
+        else:
+            squares_to_hilite=None
+        gv.board.update(squares_to_hilite)
         if move is not None:
             gv.gui.set_status_bar_msg("back: (" + self.convert_move(nmove) + move + ")")
             #gv.gui.set_status_bar_msg("back: (" + move + ")")
