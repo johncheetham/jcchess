@@ -65,7 +65,7 @@ class Drag_And_Drop:
 
             # clear the square where the piece is being moved from
             gv.board.set_cap_as_unoccupied(y, self.piece, stm)
-            gv.board.refresh_screen()
+            gv.board.update()
         else:
 
             # convert the x, y co-ords into the shogi representation

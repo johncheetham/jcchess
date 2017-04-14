@@ -62,16 +62,6 @@ class Board:
         x = lets.index(sq[0:1])
         y = int(sq[1:2]) - 1
         return x, y
-
-    def display_board(self):
-        #
-        # loop through the board squares and set the pieces
-        # x, y = 0, 0 is the top left square of the board
-        #
-        for x in range(8):
-            for y in range(8):
-                gv.gui.get_event_box(x, y).queue_draw()
-
  
     #
     # test if user has clicked on a valid source square
@@ -97,15 +87,18 @@ class Board:
 
     def use_pieceset(self, pieceset):
         gv.pieces.set_pieceset(pieceset)
-        self.refresh_screen()
+        self.update()
 
-    def update(self, refresh_gui=True):
-        if refresh_gui:
-            self.refresh_screen()
-
-    def refresh_screen(self):
-        self.display_board()
-
+    def update(self, squares_to_hilite=None):
+        self.squares_to_hilite = squares_to_hilite
+        #
+        # loop through the board squares and set the pieces
+        # x, y = 0, 0 is the top left square of the board
+        #
+        for x in range(8):
+            for y in range(8):
+                gv.gui.get_event_box(x, y).queue_draw()
+                
     #
     # return a pixbuf of the piece at the given square
     # used by drag_and_drop.py to get the drag and drop icon
@@ -168,14 +161,19 @@ class Board:
         # in last move and if so hilight it
         hilite = False
         if gv.gui.get_highlight_moves():
-            try:
-                lastmove = self.chessboard.peek()
-            except IndexError:
-                lastmove = ""
-            if lastmove != "":
-                sqnum = chess.square(x, y)
-                if sqnum in (lastmove.from_square, lastmove.to_square):
-                    hilite = True
+            if self.squares_to_hilite is not None:
+                if chess.square(x, y) in self.squares_to_hilite:
+                   hilite = True
+            else:
+                # if squares to hilite not set then hilite last move       
+                try:
+                    lastmove = self.chessboard.peek()
+                except IndexError:
+                    lastmove = ""
+                if lastmove != "":
+                    sqnum = chess.square(x, y)
+                    if sqnum in (lastmove.from_square, lastmove.to_square):
+                        hilite = True
 
         # clear square to square colour
         #gv.set_board_colours.set_square_colour(cr, a, LINEWIDTH, hilite)
@@ -191,7 +189,6 @@ class Board:
         #    r -= 50/255
         #    g -= 50/255
         #    b -= 50/255
-        
         if hilite:
             cr.set_source_rgb(1, 0, 0)
             cr.rectangle(1, 1 , a.width, a.height)
@@ -232,7 +229,7 @@ class Board:
         self.chessboard.push(cmove)
         
     def remove_move(self):
-        self.chessboard.pop()
+        return self.chessboard.pop()
         
     def print_board(self):
         print("board fen:",repr(self.chessboard))

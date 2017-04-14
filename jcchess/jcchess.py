@@ -879,7 +879,7 @@ class Game:
         nmove = len(self.movelist)
         try:
             move = self.movelist.pop()
-            gv.board.remove_move()
+            m=gv.board.remove_move()
             self.redolist.append(move)
             self.lastmove = move
             self.stm = self.get_side_to_move()
@@ -893,10 +893,11 @@ class Game:
         except:
             pass
         self.gameover = False
-        gv.board.update()
+        #gv.board.update((m.from_square, m.to_square))
         # set move list window to last move
         self.move_list.set_move(len(self.movelist))
         self.goto_move(len(self.movelist))
+        gv.board.update((m.from_square, m.to_square))
         if move is not None:
             gv.gui.set_status_bar_msg("back: (" + self.convert_move(nmove) + move + ")")
             #gv.gui.set_status_bar_msg("back: (" + move + ")")

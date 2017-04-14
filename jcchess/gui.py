@@ -1101,7 +1101,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         self.grid_eb.modify_bg(
             Gtk.StateType.NORMAL, Gdk.color_parse(grid_colour))
 
-        gv.board.refresh_screen()
+        gv.board.update()
 
     def build_edit_popup(self):
         self.edit_mode = False
