@@ -71,25 +71,24 @@ class Gamelist:
         self.window.present()
         return
 
-    def set_game_list(self, glist):
-        # update liststore
+    def set_game_list(self, allheaders):
         self.liststore.clear()
+        # reformat headers
         gameno = 0
-        for hdrs in glist:
+        for headers in allheaders:
             gameno += 1
             h = str(gameno) + ". "
             hdrno = 1
-            for hdr in hdrs:
-                hdr = hdr.strip()
-                hdr = hdr.lstrip("[")
-                hdr = hdr.rstrip("]")
-                if hdrno == 1:
-                    h = h + hdr
-                else:
-                    h = h + ", " + hdr
+            for header in headers:
+                header_value = headers.get(header)
+                # ignore unset headers
+                if "?" in header_value:
+                    continue
+                if hdrno > 1:
+                    h += ", "
+                h += header + ": " + header_value
                 hdrno += 1
-            lst = [h]
-            self.liststore.append(lst)
+            self.liststore.append([h])
 
     def loadgame_button_clicked_cb(self, button):
         (treemodel, treeiter) = self.tree_selection.get_selected()
@@ -104,8 +103,7 @@ class Gamelist:
                 gameno = int(gameno)
             except ValueError as ve:
                 return
-            psnref = jcchess.psn.get_ref()
-            psnref.load_game_from_multigame_file(gameno)
+            gv.load_save.load_game_from_multigame_file(gameno)
 
 
 def get_ref():

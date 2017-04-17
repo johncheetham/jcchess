@@ -25,17 +25,17 @@ from . import constants
 from . import gv
 from . import move_list
 from . import comments
+from . import gamelist
 import chess.pgn
 from .constants import WHITE, BLACK,  VERSION,  NAME
 
 
 class Load_Save:
 
-    load_save_ref = None
-
     def __init__(self):
         self.move_list = move_list.get_ref()
-        self.comments = comments.get_ref() 
+        self.comments = comments.get_ref()
+        self.gamelist = gamelist.get_ref() 
         
 
     # Load game from a previously saved game
@@ -90,13 +90,50 @@ class Load_Save:
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
                 #print(gv.gamedate)
             #self.load_game(fname)
-            f = open(fname)
-            first_game = chess.pgn.read_game(f)
-            f.close()
-            self.load_game_pgn(first_game)
-            return
+            games = []
+            self.file_position = []
+            gamecnt = 0
+            headers = []
 
-         #loads filename from 1st argument in commandline
+            f = open(fname)
+            self.fname = fname
+            self.file_position.append(f.tell())
+            game = chess.pgn.read_game(f)
+            self.file_position.append(f.tell())
+            game1 = game
+            while game is not None:
+                gamecnt += 1
+                headers.append(game.headers)
+                game = chess.pgn.read_game(f)
+                self.file_position.append(f.tell())
+            f.close()
+            
+            # No games in file
+            if gamecnt == 0:
+                self.gamelist.set_game_list([])
+                gv.gui.info_box("No games in file")
+                return
+
+            # single game file - Load the game
+            if gamecnt == 1:
+                self.load_game_pgn(game1)
+                return
+
+            # multi game file - Display the Game List so user can select a game
+            self.gamelist.set_game_list(headers)
+            self.gamelist.show_gamelist_window()
+
+    # called from gamelist.py to load the game selected from the gamelist
+    # of a multigame file
+    def load_game_from_multigame_file(self, gameno):
+        f = open(self.fname)
+        f.seek(self.file_position[gameno - 1])
+        game = chess.pgn.read_game(f)
+        f.close()
+        self.load_game_pgn(game)        
+
+
+        #loads filename from 1st argument in commandline
 
     #def load_game(self, fname):
     #    pgn = open(fname)
@@ -461,9 +498,3 @@ class Load_Save:
             gv.gui.set_status_bar_msg(_("game saved:  " + filename) + "  "+ VERSION)
 
         dialog.destroy()
-
-
-def get_ref():
-    if Load_Save.load_save_ref is None:
-        Load_Save.load_save_ref = Load_Save()
-    return Load_Save.load_save_ref

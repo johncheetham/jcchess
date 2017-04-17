@@ -50,7 +50,8 @@ from . import comments
 from . import board
 from . import pieces
 from . import engine_output
-from .constants import WHITE, BLACK, NEUTRAL, NAME, VERSION, BEEP, MIN_MOVETIME
+from . import load_save
+from .constants import WHITE, BLACK, NEUTRAL, NAME, VERSION
 
 
 class Game:
@@ -113,6 +114,7 @@ class Game:
         opening_book_path = os.path.join(self.prefix, "data/opening.bbk")
         #engine.init(opening_book_path, gv.verbose)
 
+        gv.load_save = load_save.Load_Save()
         gv.gui = gui.Gui()
 
         gv.pieces = pieces.Pieces()
@@ -144,9 +146,6 @@ class Game:
         # set level
         #command = "level 0 " + self.time_limit
         #engine.command(command)
-        # turn off beeps
-        #if not BEEP:
-        #    engine.command("beep")
 
         # restore users settings to values from previous game
         self.restore_settings(self.settings)
@@ -583,7 +582,9 @@ class Game:
                 #msg = self.get_side_to_move_string(self.stm) + ": " + str(len(self.movelist)) + ". " + msg
                 msg = self.get_side_to_move_string(self.stm) + ": " + msg                             
                 GLib.idle_add(gv.gui.set_status_bar_msg, msg)
-
+                # keep a sleep in the loop to avoid issues with gui updating
+                # in engine v engine games
+                time.sleep(0.1)
             self.thinking = False
         except:
             traceback.print_exc()
@@ -666,8 +667,6 @@ class Game:
         gv.board.update()
         # clean comments (bugfix)
         self.move_list.comments.clear_comments()
-        #if not BEEP:
-        #    engine.command("beep")
 
         gv.ucib.set_newgame()
         gv.uciw.set_newgame()

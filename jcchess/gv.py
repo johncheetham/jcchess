@@ -46,6 +46,7 @@ usib = None
 usiw = None
 engine_manager = None
 set_board_colours = None
+load_save = None
 
 # Make sure no gv global variables have been created elsewhere
 # Only those above should be present

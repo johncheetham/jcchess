@@ -61,7 +61,6 @@ class Gui:
         self.gamelist = gamelist.get_ref()
         self.drag_and_drop = drag_and_drop.get_ref()
         self.enable_dnd = True
-        self.load_save = load_save.get_ref()
         self.show_coords = True
         self.highlight_moves = True
         self.lastdir = os.path.expanduser("~") # Filehandling
@@ -144,9 +143,9 @@ class Gui:
             ("Quit", Gtk.STOCK_QUIT, _("_Quit"), None,
              _("Quit the Program"), gv.jcchess.quit_game),
             ("LoadGame", Gtk.STOCK_OPEN, _("_Load Game"), None,
-             _("Load Game"), self.load_save.load_game),
+             _("Load Game"), gv.load_save.load_game),
             ("SaveGame", Gtk.STOCK_SAVE, _("_Save Game"), None,
-             _("Save Game"), self.load_save.save_game),
+             _("Save Game"), gv.load_save.save_game),
             ("File", None, _("_File")),
             ("Edit", None, _("_Edit")),
             ("Undo", Gtk.STOCK_UNDO, _("_Undo Move"), "<Control>U",
@@ -301,6 +300,7 @@ class Gui:
             </menu>
             <menu action="View">
                 <menuitem action="MoveList"/>
+                <menuitem action="GameList"/>
                 <menuitem action="EngineOutput"/>
                 <menuitem action="EngineDebug"/>
             </menu>

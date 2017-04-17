@@ -20,16 +20,6 @@
 NAME = "jcchess"
 VERSION = "0.0.1"
 
-# Beep after move - not implemented yet
-BEEP = False
-
-# Specify a minimum move time in seconds for engines.
-# A value of say 1.0 will mean that there will be
-# at least 1 second between moves being displayed.
-# This makes it easier to follow when the engines are moving
-# very quickly
-MIN_MOVETIME = 0.5
-
 # These values match those used in the engine
 BLACK = 0
 WHITE = 1
