@@ -52,14 +52,10 @@ def paste_clipboard_to_FEN(action):
         print("Error - FEN data:",fen) 
         gv.gui.info_box("Error: invalid fen")
         return
-    load_save_ref = load_save.get_ref()
-    load_save_ref.init_game(fen)
+    gv.load_save.init_game(fen)
     
 
 def copy_game_to_clipboard(action):
-    #load_save_ref = load_save.get_ref()
-    #gamestr = load_save_ref.get_game()
-    #copy_text_to_clipboard(gamestr)
     copy_text_to_clipboard(str(gv.board.get_game()))
 
 
@@ -68,12 +64,9 @@ def paste_game_from_clipboard(action):
     if gamestr is None:
         print("Error invalid game data")
         return
-    #psn_ref = psn.get_ref()
-    #psn_ref.load_game_psn_from_str(gamestr)
     pgn = StringIO(gamestr)
     game = chess.pgn.read_game(pgn)
-    load_save_ref = load_save.get_ref()
-    load_save_ref.load_game_pgn(game)
+    gv.load_save.load_game_pgn(game)
 
     
 def copy_text_to_clipboard(text):

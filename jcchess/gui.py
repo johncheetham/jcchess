@@ -1180,7 +1180,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
                 "Unable to edit board - you need a newer version of pygtk"
                 "(version 2.16 or above)")
             return
-        print("piece_name=",piece_name)
+
         if piece_name == _("Clear Board"):
             gv.board.clear_board()
             return
@@ -1242,15 +1242,13 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         else:
             colour = chess.BLACK    
         # add piece to main board
-        print("sssss=",self.ed_x, self.ed_y)
         gv.board.set_piece_at_square(self.ed_x, self.ed_y, piece, colour)
 
     # save position and exit edit mode
     def end_edit(self):
         self.edit_mode = False
         fen = gv.board.get_fen()
-        load_save_ref = load_save.get_ref()
-        load_save_ref.init_game(fen)      # update board to reflect edit
+        gv.load_save.init_game(fen)      # update board to reflect edit
         self.enable_menu_items(mode="editmode")
 
     def enable_edit_mode(self, action):
