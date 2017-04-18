@@ -19,9 +19,7 @@
 from gi.repository import GLib
 from gi.repository import Gtk
 import os
-import errno
 from datetime import date
-from . import constants
 from . import gv
 from . import move_list
 from . import comments
@@ -35,13 +33,10 @@ class Load_Save:
     def __init__(self):
         self.move_list = move_list.get_ref()
         self.comments = comments.get_ref()
-        self.gamelist = gamelist.get_ref() 
-        
+        self.gamelist = gamelist.get_ref()
 
     # Load game from a previously saved game
     def load_game(self, b):
- 
-                # Not a permission error.
         dialog = Gtk.FileChooserDialog(
             _("Load.."), gv.gui.get_window(), Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -54,11 +49,6 @@ class Load_Save:
         filter.add_pattern("*.pgn")
         dialog.add_filter(filter)
 
-        #filter = Gtk.FileFilter()
-        #filter.set_name("gshog files")
-        #filter.add_pattern("*.gshog")
-        #dialog.add_filter(filter)
-
         filter = Gtk.FileFilter()
         filter.set_name("All files")
         filter.add_pattern("*")
@@ -68,8 +58,7 @@ class Load_Save:
         if response != Gtk.ResponseType.OK:
             dialog.destroy()
             return
- 
-                # Not a permission error.
+
         fname = dialog.get_filename()
         gv.lastdir = os.path.dirname(fname)
         if gv.verbose == True:       
@@ -89,38 +78,31 @@ class Load_Save:
                 #print(gv.event)
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
                 #print(gv.gamedate)
-            #self.load_game(fname)
-            games = []
-            self.file_position = []
-            gamecnt = 0
-            headers = []
 
+            gamecnt = 0
+            self.file_position = []
+            self.gamelist.clear()
+            
+            # get headers and offsets of games
             f = open(fname)
             self.fname = fname
-            self.file_position.append(f.tell())
-            game = chess.pgn.read_game(f)
-            self.file_position.append(f.tell())
-            game1 = game
-            while game is not None:
+            for offset, headers in chess.pgn.scan_headers(f):
                 gamecnt += 1
-                headers.append(game.headers)
-                game = chess.pgn.read_game(f)
-                self.file_position.append(f.tell())
+                self.gamelist.addgame(gamecnt, headers)
+                self.file_position.append(offset)
             f.close()
-            
+
             # No games in file
             if gamecnt == 0:
-                self.gamelist.set_game_list([])
                 gv.gui.info_box("No games in file")
                 return
 
             # single game file - Load the game
             if gamecnt == 1:
-                self.load_game_pgn(game1)
+                self.load_game_from_multigame_file(1)
                 return
 
             # multi game file - Display the Game List so user can select a game
-            self.gamelist.set_game_list(headers)
             self.gamelist.show_gamelist_window()
 
     # called from gamelist.py to load the game selected from the gamelist
@@ -130,18 +112,9 @@ class Load_Save:
         f.seek(self.file_position[gameno - 1])
         game = chess.pgn.read_game(f)
         f.close()
-        self.load_game_pgn(game)        
+        self.load_game_pgn(game)
 
-
-        #loads filename from 1st argument in commandline
-
-    #def load_game(self, fname):
-    #    pgn = open(fname)
-    #    first_game = chess.pgn.read_game(pgn)
-    #    pgn.close()
-    #    self.load_game_pgn(first_game)
-        
-    def load_game_pgn(self, game):    
+    def load_game_pgn(self, game):
         stm = WHITE
         moveno = 0
         movelist = []
@@ -205,12 +178,9 @@ class Load_Save:
         gv.tc.reset_clock()
 
         return 0
-        
-    #def load_game_pgn_from_str(gamestr):
-    #    pgn = StringIO(pgn_string)
-    #    game = chess.pgn.read_game(pgn)
-        
-    def load_game_parm(self,fname):        
+
+    #loads filename from 1st argument in commandline
+    def load_game_parm(self,fname):
         try:
                 fp = open(fname)
         except  :
@@ -228,7 +198,6 @@ class Load_Save:
                 GLib.idle_add(gv.gui.header_lbldate.set_text, gv.gamedate[:50])
             self.psn.load_game_psn(fname)
             return
-        #called from load_safe
 
     def get_header_from_file(self, fname):
         # sente,gote,event, date
@@ -403,11 +372,6 @@ class Load_Save:
         filter.add_pattern("*.pgn")
         dialog.add_filter(filter)
 
-        #filter = Gtk.FileFilter()
-        #filter.set_name("gshog files")
-        #filter.add_pattern("*.gshog")
-        #dialog.add_filter(filter)
-
         filter = Gtk.FileFilter()
         filter.set_name("All files")
         filter.add_pattern("*")
@@ -419,10 +383,10 @@ class Load_Save:
             startpos = gv.jcchess.get_startpos()
 
             #
-            # filename must end with .gshog or .psn
+            # filename must end with .pgn
             #
             filename = dialog.get_filename()
-            gv.lastdir = os.path.dirname(filename) # !!
+            gv.lastdir = os.path.dirname(filename)
             if gv.verbose == True:
                 print("saving: " + gv.lastdir)
             gv.gui.window.set_title(NAME + " " + VERSION + "  " + os.path.basename(filename))

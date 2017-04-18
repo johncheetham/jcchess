@@ -48,7 +48,7 @@ class Gamelist:
         tvcolumn0.pack_start(cell0, True)
         tvcolumn0.set_min_width(50)
         tvcolumn0.set_attributes(cell0, text=0)
-
+        self.treeview.connect("row_activated", self.entry_clicked)
         self.tree_selection = self.treeview.get_selection()
 
         self.window.hide()
@@ -59,6 +59,10 @@ class Gamelist:
         self.window.hide()
         return True  # do not propagate to other handlers
 
+    def entry_clicked(self, widget, data=None, data2=None):
+        button = None
+        self.loadgame_button_clicked_cb(button)
+        
     # called from gui.py when doing view gamelist
     def show_gamelist_window_cb(self, action):
         self.show_gamelist_window()
@@ -71,24 +75,22 @@ class Gamelist:
         self.window.present()
         return
 
-    def set_game_list(self, allheaders):
+    def clear(self):
         self.liststore.clear()
-        # reformat headers
-        gameno = 0
-        for headers in allheaders:
-            gameno += 1
-            h = str(gameno) + ". "
-            hdrno = 1
-            for header in headers:
-                header_value = headers.get(header)
-                # ignore unset headers
-                if "?" in header_value:
-                    continue
-                if hdrno > 1:
-                    h += ", "
-                h += header + ": " + header_value
-                hdrno += 1
-            self.liststore.append([h])
+        
+    def addgame(self, gameno, headers):
+        h = str(gameno) + ". "
+        hdrno = 1
+        for header in headers:
+            header_value = headers.get(header)
+            # ignore unset headers
+            if "?" in header_value:
+                continue
+            if hdrno > 1:
+                h += ", "
+            h += header + ": " + header_value
+            hdrno += 1
+        self.liststore.append([h])
 
     def loadgame_button_clicked_cb(self, button):
         (treemodel, treeiter) = self.tree_selection.get_selected()
