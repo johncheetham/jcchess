@@ -19,7 +19,6 @@
 
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import GObject
 import os
 
 from . import uci
@@ -31,7 +30,6 @@ class Engine_Manager:
 
     def __init__(self):
         # engine list is list of (name, path) pairs
-        #self.engine_list = [("jcchess", "")]
         self.engine_list = []
         self.glade_file = None
         self.hash_value = 256
@@ -86,8 +84,6 @@ class Engine_Manager:
 
     def engines(self, b):
 
-        # self.usi1.stop_engine()
-        # self.usi2.stop_engine()
         engine_list = self.get_engine_list()
 
         dialog = Gtk.Dialog(
@@ -120,7 +116,6 @@ class Engine_Manager:
         treeview.show()
         fr.add(treeview)
         hb.pack_start(fr, True, True, 20)
-        treeview.connect("button-press-event", self.engine_changed)
 
         bb = Gtk.VButtonBox()
         bb.set_layout(Gtk.ButtonBoxStyle.START)
@@ -136,14 +131,14 @@ class Engine_Manager:
         add_button.connect("clicked", self.add_engine, "add engine")
 
         self.delete_button = Gtk.Button(_("Delete"))
-        self.delete_button.set_sensitive(False)
+        #self.delete_button.set_sensitive(False)
         self.delete_button.show()
         bb.add(self.delete_button)
         self.delete_button.connect("clicked",
                                    self.delete_engine, "delete engine")
 
         self.rename_button = Gtk.Button(_("Rename"))
-        self.rename_button.set_sensitive(False)
+        #self.rename_button.set_sensitive(False)
         self.rename_button.show()
         bb.add(self.rename_button)
         self.rename_button.connect("clicked",
@@ -165,20 +160,7 @@ class Engine_Manager:
                 elist.append((name, path))
                 l_iter = tm.iter_next(l_iter)
             self.set_engine_list(elist)
-
         dialog.destroy()
-
-    def engine_changed(self, widget, event):
-        GObject.idle_add(self.engine_changed2)
-
-    def engine_changed2(self):
-        name, path = self.get_selected_engine()
-        if name == "jcchess":
-            self.delete_button.set_sensitive(False)
-            self.rename_button.set_sensitive(False)
-        else:
-            self.delete_button.set_sensitive(True)
-            self.rename_button.set_sensitive(True)
 
     def get_selected_engine(self):
         ts = self.treeview.get_selection()
@@ -247,13 +229,8 @@ class Engine_Manager:
         if gv.jcchess.get_player(player) == "Human":
             gv.gui.info_box(_("No options to configure"))
             return
-
-        if uci.get_engine() == "jcchess":
-            # gv.jcchess.set_level(widget)
-            gv.gui.info_box(_("No options to configure"))
-            return
-        else:
-            uci.UCI_options(widget)
+            
+        uci.UCI_options(widget)
 
     def delete_engine(self, widget, data=None):
 
@@ -270,15 +247,18 @@ class Engine_Manager:
         name = tm.get_value(l_iter, 0)
         path = tm.get_value(l_iter, 1)
 
-        if name == "jcchess":
-            gv.gui.info_box(_("delete of jcchess engine not permitted"))
-            return
-
         if not lso.remove(l_iter):
             # set to 1st engine after a delete if iter no longer valid
             l_iter = tm.get_iter_first()
 
-        ts.select_iter(l_iter)
+        if l_iter is not None:
+            ts.select_iter(l_iter)
+            
+        # if the deleted engine is in use as one of the players
+        # then change that player to human    
+        for side in (WHITE, BLACK):
+            if name == gv.jcchess.get_player(side):
+                gv.jcchess.set_player(side, "Human")
 
     def rename_engine(self, widget, data=None):
 
@@ -294,10 +274,6 @@ class Engine_Manager:
 
         name = tm.get_value(l_iter, 0)
         path = tm.get_value(l_iter, 1)
-
-        if name == "jcchess":
-            gv.gui.info_box(_("rename of jcchess engine not permitted"))
-            return
 
         dialog = Gtk.MessageDialog(
             None,

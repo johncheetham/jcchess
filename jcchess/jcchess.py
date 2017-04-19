@@ -107,7 +107,6 @@ class Game:
         self.movelist = []
         self.lastmove = ""
         self.redolist = []
-        #self.player = ["Human", "jcchess"]
         self.player = ["Human", "Human"]
         self.pondermove = [None, None]
 
@@ -1088,6 +1087,11 @@ class Game:
 
     def get_player(self, side):
         return self.player[side]
+        
+    def set_player(self, side, player):
+        self.player[side] = player
+        gv.ucib.set_engine(self.player[side], None)
+        gv.gui.update_toolbar(self.player)
 
     def move_now(self, b):
         if self.player[self.stm] == "Human":
