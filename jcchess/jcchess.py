@@ -788,7 +788,7 @@ class Game:
                 gv.engine_manager.set_hash_value(hash_value)
             except Exception as e:
                 if gv.verbose:
-                    print(e, ". hash value not restoself.player[side]:red")
+                    print(e, ". hash value not restored")
 
             # ponder (true/false)
             try:

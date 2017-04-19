@@ -607,7 +607,7 @@ class Uci:
                         w.pop(0)
                         for j in w:
                             name = name + j + " "
-                        name.strip()
+                        name = name.strip()
                     self.uci_option.append(l)
                 if l == "uciok":
                     uci_ok = True
@@ -625,7 +625,6 @@ class Uci:
             self.p.terminate()
         except:
             pass
-
         return msg, name
 
     def set_engine(self, ename, path):

@@ -23,6 +23,8 @@ from gi.repository import GObject
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 import cairo
+import socket
+from datetime import datetime
 
 import chess
 import chess.pgn
@@ -264,11 +266,11 @@ class Board:
         # the way they were
         for i in range(0, redo_count):
             gv.jcchess.undo_move()
-            
-        del game.headers["Event"]
-        del game.headers["Site"]
-        del game.headers["Date"]
-        del game.headers["Round"]
+
+        game.headers["Event"] = "Computer Chess Game"
+        game.headers["Site"] = socket.gethostname()
+        game.headers["Date"] = datetime.strftime(datetime.now(), '%Y.%m.%d')  
+        game.headers["Round"] = "-"
         game.headers["White"] = gv.jcchess.get_player(WHITE)
         game.headers["Black"] = gv.jcchess.get_player(BLACK)
         return game
