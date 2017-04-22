@@ -178,19 +178,14 @@ class Board:
                         hilite = True
 
         # clear square to square colour
-        #gv.set_board_colours.set_square_colour(cr, a, LINEWIDTH, hilite)
-        # FIXME - hard coded colours
+        darksquare, lightsquare = gv.set_board_colours.get_square_colour()
         if (x+y) % 2 == 0:
-            #r, g, b = self.get_cairo_colour(square_colour)
-            r, g, b = 205/255, 133/255,  63/255
+            r, g, b = darksquare
         else:
-            #r, g, b = 1, 1, 1
-            r, g, b = 255/255, 222/255, 173/255
-        # modify it a bit to get r, g, b of hilite colour
-        #if hilite:
-        #    r -= 50/255
-        #    g -= 50/255
-        #    b -= 50/255
+            r, g, b = lightsquare
+        r, g, b = r/255, g/255, b/255                    
+
+        # if square is highlighted put a red rectangle around it
         if hilite:
             cr.set_source_rgb(1, 0, 0)
             cr.rectangle(1, 1 , a.width, a.height)

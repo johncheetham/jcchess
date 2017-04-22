@@ -41,7 +41,6 @@ from . import gv
 from . import utils
 from . import gui
 from . import uci
-#from . import  sys
 from . import engine_manager
 from . import time_control
 from . import set_board_colours
@@ -118,7 +117,7 @@ class Game:
 
         gv.pieces = pieces.Pieces()
         # custom pieceset path
-        if self.settings != "":
+        if self.settings is not None:
             gv.pieces.set_custom_pieceset_path(
                 self.settings.custom_pieceset_path)
         gv.pieces.load_pieces(self.prefix)
@@ -135,9 +134,8 @@ class Game:
 
         gv.set_board_colours = set_board_colours.Set_Board_Colours(self.prefix)
         # set colours to previous game (if any)
-        if self.settings != "":
-            gv.set_board_colours.restore_colour_settings(
-                self.settings.colour_settings)
+        if self.settings is not None:
+            gv.set_board_colours.set_colour_scheme(self.settings.colour_settings)
         gv.gui.build_gui()
         gv.board.build_board()
         self.engine_output = engine_output.get_ref()
@@ -377,40 +375,6 @@ class Game:
         # it's the computers turn to move. kick off a separate thread for
         # computers move so that gui is still useable
         self.ct = _thread.start_new_thread(self.computer_move, ())
-
-    def cap_square_clicked(self, widget, event, data):
-
-        # if in edit board mode then call routines in board.py to change the
-        # piece count in the komadai
-        if gv.gui.get_edit_mode():
-            x, y, colour = data
-            if event.button == 1:
-                # left click - decrement count for the piece clicked on
-                gv.board.decrement_cap_piece(y, colour)
-            elif event.button == 3:
-                # right click - increment count for the piece clicked on
-                gv.board.increment_cap_piece(y, colour)
-            return
-
-        if self.gameover or self.thinking:
-            return
-
-        x, y, colour = data
-
-        # If user clicked in the black capture area and it's white to move or
-        # vice versa then ignore
-        stm = self.get_side_to_move()
-        if stm != colour:
-            return
-
-        self.src_x = x
-        self.src_y = y
-        self.piece = gv.board.get_cap_piece(y, stm)
-
-        if (self.piece != "-"):
-            self.src = self.piece + "*"
-        else:
-            self.src = ""
 
     def get_prefix(self):
         return self.prefix
@@ -712,7 +676,7 @@ class Game:
         s.player_white = self.player[WHITE]
         s.player_black = self.player[BLACK]
         s.clock_settings = gv.tc.get_clock_settings()
-        s.colour_settings = gv.set_board_colours.get_settings()
+        s.colour_settings = gv.set_board_colours.get_colour_scheme()
         s.hash_value = gv.engine_manager.get_hash_value()
         s.ponder = gv.engine_manager.get_ponder()
         s.show_coords = gv.gui.get_show_coords()

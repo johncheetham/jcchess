@@ -291,6 +291,8 @@ class Gui:
                 <menuitem action="Redo"/>
                 <menuitem action="MoveNow"/>
                 <separator/>
+                <menuitem action="SetBoardColours"/>
+                <separator/>
                 <menuitem action="TimeControl"/>
                 <menuitem action="ConfigureEngine1"/>
                 <menuitem action="ConfigureEngine2"/>
@@ -1067,37 +1069,23 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         #self.window.set_default_size(w, h)
         self.window.resize(w, h)
 
-    def set_colours(self, bg_colour, komadai_colour, square_colour,
-                    text_colour, border_colour, grid_colour):
+    def set_colours(self):
         if gv.verbose:
-            print("in gui set_colours with these parms:")
-            print("  bg_colour=", bg_colour)
-            print("  komadai_colour=", komadai_colour)
-            print("  square_colour=", square_colour)
-            print("  text_colour=", text_colour)
-            # print "  piece_fill_colour=", piece_fill_colour
-            # print "  piece_outline_colour=", piece_outline_colour
-            # print "  piece_kanji_colour=", piece_kanji_colour
-            print("  border_colour=", border_colour)
-            print("  grid_colour=", grid_colour)
-
+            print("in gui set_colours")
+        bg_colour = '#888a85'
         self.get_window().modify_bg(
             Gtk.StateType.NORMAL, Gdk.color_parse(bg_colour))
         eb_2 = self.builder.get_object("eb_2")
-        eb_2.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(bg_colour)) #modif 17.1.17
-        #self.komadaiw_eb.modify_bg(
-        #    Gtk.StateType.NORMAL, Gdk.color_parse(komadai_colour))
-        #self.komadaib_eb.modify_bg(
-        #    Gtk.StateType.NORMAL, Gdk.color_parse(komadai_colour))
+        eb_2.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(bg_colour))
 
-        # square/komadai square colours are set in board.py in
-        # set_image_cairo_komadai and set_image_cairo
+        # square colours are set in board.py in set_image_cairo
 
         # border surrounds the board and contains the co-ordinates
         #self.border_eb.modify_bg(
         #    Gtk.StateType.NORMAL, Gdk.color_parse(border_colour))
         self.border_eb.queue_draw()
 
+        grid_colour = '#000000'
         self.grid_eb.modify_bg(
             Gtk.StateType.NORMAL, Gdk.color_parse(grid_colour))
 
@@ -1289,7 +1277,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
         cr = widget.get_window().cairo_create()
 
         # cr.set_source_rgb(0.0, 0.0, 0.0)  # black
-        col = gv.set_board_colours.get_text_colour()
+        col = '#000000'
         r = col[1:3]
         g = col[3:5]
         b = col[5:7]
@@ -1321,8 +1309,7 @@ along with jcchess.  If not, see <http://www.gnu.org/licenses/>."""
             font_size = 7
 
         cr.set_font_size(font_size)
-        
-        
+
         let = "abcdefgh"        
         xpos = int((widget.get_allocation().width - tb_width) / 2) + int(sq_size / 2)
         ypos1 = 14

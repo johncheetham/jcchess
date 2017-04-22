@@ -87,7 +87,7 @@ def get_text_from_clipboard():
 
 
 def get_settings_from_file(filepath):
-    s = ""
+    s = None
     try:
         settings_file = os.path.join(filepath, "settings")
         f = open(settings_file, "rb")
