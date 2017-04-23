@@ -29,7 +29,7 @@ installed = True
 
 # set in gchess.py
 verbose = False
-verbose_usi = False
+verbose_uci = False
 lastdir = ""
 event = ""
 gamedate = ""

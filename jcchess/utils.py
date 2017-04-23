@@ -131,14 +131,14 @@ def create_settings_dir():
 
 def get_verbose():
     verbose = False
-    verbose_usi = False
+    verbose_uci = False
     showmoves = False
     showheader = False
     for arg in sys.argv:
         if arg == "-v" or arg == "--verbose":
             verbose = True
-        if arg == "-vusi":
-            verbose_usi = True
+        if arg == "-vuci":
+            verbose_uci = True
         if arg == "-m":
             showmoves = True
         if arg == "-h":
@@ -146,4 +146,4 @@ def get_verbose():
         if arg == "-mh" or arg == "-hm":
             showmoves = True
             showheader = True           
-    return verbose, verbose_usi, showmoves, showheader
+    return verbose, verbose_uci, showmoves, showheader
