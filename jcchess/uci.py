@@ -100,6 +100,7 @@ class Uci:
         self.command("uci\n")
 
         # wait for reply
+        self.uservalues=gv.engine_manager.get_uservalues(self.engine)
         self.uci_option = []
         uci_ok = False
         i = 0
@@ -108,7 +109,7 @@ class Uci:
                 l = l.strip()
                 # print l
                 if l.startswith("option"):
-                    self.uci_option.append(l)
+                    self.uci_option.append(self.option_parse(l))
                 if l == "uciok":
                     uci_ok = True
             self.op = []
@@ -131,7 +132,12 @@ class Uci:
         else:
             ponder_str = "false"
         self.command("setoption name Ponder value " + ponder_str + "\n")
-
+        
+        # send setoption where we have a uservalue that differs from default
+        uservalues = gv.engine_manager.get_uservalues(self.engine)
+        for name, value in uservalues.items():
+            self.command("setoption name " + name + " value " + value + "\n")
+            
         # Ask if ready
         self.command("isready\n")
 
@@ -157,9 +163,66 @@ class Uci:
         self.command("ucinewgame\n")
         self.engine_running = True
         self.running_engine = self.engine
-
         return True
 
+    def option_parse(self, option_line):
+        name = ""
+        otype = ""
+        default = ""
+        minimum = ""
+        maximum = ""
+        userval = ""
+        try:
+            words = option_line.split()
+            w = words.pop(0)
+            if w != "option":
+                if gv.verbose:
+                    print("invalid option line ignored:", option)
+                return
+
+            # get option name
+            w = words.pop(0)
+            if w != "name":
+                if gv.verbose:
+                    print("invalid option line ignored:", option)
+                return
+            # name can contain spaces
+            name = ''
+            w = words.pop(0)
+            while w != "type" and len(words) != 0:
+                name += ' ' + w
+                w = words.pop(0)
+            name=name.strip()
+
+            # get option type
+            if w != "type":
+                if gv.verbose:
+                    print("invalid option line ignored:", option)
+                return
+            otype = words.pop(0)
+
+            uvars = []
+            while True:
+                w = words.pop(0)
+                w2 = words.pop(0)
+                if w == "default":
+                    default = w2
+                elif w == "min":
+                    minimum = w2
+                elif w == "max":
+                    maximum = w2
+                elif w == "var":
+                    uvars.append(w2)
+                elif w == "userval":
+                    userval = w2
+                else:
+                    if gv.verbose:
+                        print("error parsing option:", option)
+        except IndexError:
+            pass
+        userval = self.uservalues.get(name, default)
+        return([name, otype, default, minimum, maximum, uvars, userval])
+                        
     def command(self, cmd):
         e = self.side + "(" + self.get_running_engine().strip() + "):"
         if gv.verbose or gv.verbose_uci:
@@ -606,7 +669,7 @@ class Uci:
                         for j in w:
                             name = name + j + " "
                         name = name.strip()
-                    self.uci_option.append(l)
+                    self.uci_option.append(self.option_parse(l))
                 if l == "uciok":
                     uci_ok = True
             self.op = []
@@ -647,67 +710,22 @@ class Uci:
     def UCI_options(self, b):
         self.check_running()
         options = self.get_options()
-
+        # option
+        # [name, otype, default, minimum, maximum, uvars, userval]
         wdgts = []
         opt_i = -1
         for option in options:
             opt_i += 1
-            name = ""
-            otype = ""
-            default = ""
-            minimum = ""
-            maximum = ""
-            userval = ""
-            try:
-                words = option.split()
-                w = words.pop(0)
-                if w != "option":
-                    if gv.verbose:
-                        print("invalid option line ignored:", option)
-                    continue
-
-                # get option name
-                w = words.pop(0)
-                if w != "name":
-                    if gv.verbose:
-                        print("invalid option line ignored:", option)
-                    continue
-                # name can contain spaces
-                name = ''
-                w = words.pop(0)
-                while w != "type" and len(words) != 0:
-                    name += ' ' + w
-                    w = words.pop(0)
-                name=name.strip()
-
-                # get option type
-                if w != "type":
-                    if gv.verbose:
-                        print("invalid option line ignored:", option)
-                    continue
-                otype = words.pop(0)
-
-                uvars = []
-                while True:
-                    w = words.pop(0)
-                    w2 = words.pop(0)
-                    if w == "default":
-                        default = w2
-                    elif w == "min":
-                        minimum = w2
-                    elif w == "max":
-                        maximum = w2
-                    elif w == "var":
-                        uvars.append(w2)
-                    elif w == "userval":
-                        userval = w2
-                    else:
-                        if gv.verbose:
-                            print("error parsing option:", option)
-
-            except IndexError:
-                pass
-
+            name = option[0]
+            otype = option[1]
+            default = option[2]
+            minimum = option[3]
+            maximum = option[4]
+            uvars = option[5]
+            userval = option[6]
+            # if in common engine settings then skip
+            if name in ("Hash", "Ponder"):
+                continue
             wdgts.append((
                 opt_i, name, otype, default, minimum, maximum, uvars, userval))
 
@@ -894,12 +912,9 @@ class Uci:
                 # uci.set_option(
                 #   "option name LimitDepth type spin default 10 min 4 max 10")
                 a = "setoption name " + name + " value " + str(av)
-                # print "a=",a
                 self.set_option(a)
-                u = options[opt_i].find("userval")
-                if u == -1:
-                    options[opt_i] = options[opt_i] + " userval " + str(av)
-                else:
-                    options[opt_i] = options[opt_i][0:u] + "userval " + str(av)
+                # update user value
+                options[opt_i][6] = str(av)
             self.set_options(options)
+            gv.engine_manager.set_uservalues(self.engine, options)
         dialog.destroy()
