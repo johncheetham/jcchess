@@ -707,7 +707,7 @@ class Uci:
         else:
             return self.running_engine
 
-    def UCI_options(self, b):
+    def UCI_options(self):
         self.check_running()
         options = self.get_options()
         # option
@@ -918,3 +918,4 @@ class Uci:
             self.set_options(options)
             gv.engine_manager.set_uservalues(self.engine, options)
         dialog.destroy()
+        self.stop_engine()

@@ -144,6 +144,12 @@ class Engine_Manager:
         bb.add(self.rename_button)
         self.rename_button.connect("clicked",
                                    self.rename_engine, "rename engine")
+                                   
+        self.configure_button = Gtk.Button(_("Configure"))
+        self.configure_button.show()
+        bb.add(self.configure_button)
+        self.configure_button.connect("clicked",
+                             self.configure_engine, "configure engine")
 
         hb.pack_start(al, False, True, 0)
 
@@ -152,13 +158,14 @@ class Engine_Manager:
         dialog.set_default_response(Gtk.ResponseType.OK)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
+            # rebuild engine list
             elist = []
             tm = self.treeview.get_model()
             l_iter = tm.get_iter_first()
             while (l_iter is not None):
                 name = tm.get_value(l_iter, 0)
-                path = tm.get_value(l_iter, 1)
-                elist.append([name, path, {}])
+                path = tm.get_value(l_iter, 1)                
+                elist.append([name, path, self.get_uservalues(name)])
                 l_iter = tm.iter_next(l_iter)
             self.set_engine_list(elist)
         dialog.destroy()
@@ -218,20 +225,43 @@ class Engine_Manager:
 
         dialog.destroy()
 
+    # Called from this module by clicking 'configure' button
+    # or from gui.py by selecting configure engine from menu
     def configure_engine(self, widget, data=None):
+        # button was clicked
+        if widget.get_name() == "GtkButton":
+            ts = self.treeview.get_selection()
+
+            # get liststore object/iter
+            lso, l_iter = ts.get_selected()
+            tm = self.treeview.get_model()
+
+            if l_iter is None:
+                gv.gui.info_box(_("no engine selected"))
+                return
+
+            name = tm.get_value(l_iter, 0)
+            path = tm.get_value(l_iter, 1)
+            u = uci.Uci("1")
+            u.set_engine(name, path)
+            #u.start_engine(path)
+            u.UCI_options()
+            return
+
+        # configure engine menu item was selected    
         if widget.get_name() == "ConfigureEngine1":
             player = WHITE
-            uci = gv.uciw
+            uciref = gv.uciw
         else:
             player = BLACK
-            uci = gv.ucib
+            uciref = gv.ucib
 
         # If not an engine return
         if gv.jcchess.get_player(player) == "Human":
             gv.gui.info_box(_("No options to configure"))
             return
             
-        uci.UCI_options(widget)
+        uciref.UCI_options()
 
     def delete_engine(self, widget, data=None):
 
