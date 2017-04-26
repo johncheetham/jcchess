@@ -94,9 +94,35 @@ class Engine_Manager:
 
         hb = Gtk.HBox(False, 20)
         hb.show()
+        
+        # left side buttons
+        lbb = Gtk.VButtonBox()
+        lbb.set_layout(Gtk.ButtonBoxStyle.START)
+        lbb.show()
 
+        al = Gtk.Alignment.new(xalign=0.0, yalign=0.5, xscale=0.0, yscale=0.0)
+        al.add(lbb)
+        al.show()
+
+        buttons = (
+            _("Move to Top"),
+            _("Move Up"),
+            _("Move Down"),
+            _("Move to Bottom")
+            )
+        for label in buttons:            
+            button = Gtk.Button(label)
+            button.show()
+            lbb.add(button)
+            button.connect("clicked", self.move_engine, "move engine")
+
+        hb.pack_start(al, False, True, 10)
+        
+        # scroll window for list of engines
         sw = Gtk.ScrolledWindow.new(None, None)
         sw.show()
+        fr = Gtk.Frame()
+        fr.show()
         liststore = Gtk.ListStore(str, str)
         for e in engine_list:
             engine_name, path, ucioptions = e
@@ -116,8 +142,10 @@ class Engine_Manager:
         tvcolumn.set_attributes(cell, text=0)
         treeview.show()
         sw.add(treeview)
-        hb.pack_start(sw, True, True, 10)
+        fr.add(sw)
+        hb.pack_start(fr, True, True, 10)
 
+        # right side buttons
         bb = Gtk.VButtonBox()
         bb.set_layout(Gtk.ButtonBoxStyle.START)
         bb.show()
@@ -188,6 +216,42 @@ class Engine_Manager:
             name = tm.get_value(l_iter, 0)
             path = tm.get_value(l_iter, 1)
         return name, path
+
+    # move engine up the list by 1 position
+    def move_engine(self, widget, data=None):
+        ts = self.treeview.get_selection()
+        # get liststore object/iter
+        lso, l_iter = ts.get_selected()
+        tm = self.treeview.get_model()
+        if l_iter is None:
+            gv.gui.info_box(_("no engine selected"))
+            return
+
+        if widget.get_label() == "Move to Top":
+            iter_1st = tm.get_iter_first()
+            if iter_1st is None:
+                return
+            self.liststore.swap(l_iter, iter_1st)
+            return
+        elif widget.get_label() == "Move Up":
+            iter_prev = tm.iter_previous(l_iter)
+            if iter_prev is None:
+                return
+            self.liststore.swap(l_iter, iter_prev)
+            return
+        elif widget.get_label() == "Move Down":
+            iter_next = tm.iter_next(l_iter)
+            if iter_next is None:
+                return
+            self.liststore.swap(l_iter, iter_next)
+            return
+        elif widget.get_label() == "Move to Bottom":
+            numnodes = tm.iter_n_children(None)
+            lastiter = tm.iter_nth_child (None, numnodes - 1)
+            if lastiter is None:
+                return
+            self.liststore.swap(l_iter, lastiter)
+            return
 
     def add_engine(self, widget, data=None):
         dialog = Gtk.FileChooserDialog(
