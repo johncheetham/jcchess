@@ -219,6 +219,8 @@ class Engine_Manager:
 
     # move engine up the list by 1 position
     def move_engine(self, widget, data=None):
+
+        # get iter of selected engine
         ts = self.treeview.get_selection()
         # get liststore object/iter
         lso, l_iter = ts.get_selected()
@@ -227,31 +229,18 @@ class Engine_Manager:
             gv.gui.info_box(_("no engine selected"))
             return
 
-        if widget.get_label() == "Move to Top":
-            iter_1st = tm.get_iter_first()
-            if iter_1st is None:
-                return
-            self.liststore.swap(l_iter, iter_1st)
-            return
-        elif widget.get_label() == "Move Up":
+        if widget.get_label() == _("Move to Top"):
+            self.liststore.move_after(l_iter, None)
+        elif widget.get_label() == _("Move Up"):
             iter_prev = tm.iter_previous(l_iter)
-            if iter_prev is None:
-                return
-            self.liststore.swap(l_iter, iter_prev)
-            return
-        elif widget.get_label() == "Move Down":
+            if iter_prev is not None:
+                self.liststore.swap(l_iter, iter_prev)
+        elif widget.get_label() == _("Move Down"):
             iter_next = tm.iter_next(l_iter)
-            if iter_next is None:
-                return
-            self.liststore.swap(l_iter, iter_next)
-            return
-        elif widget.get_label() == "Move to Bottom":
-            numnodes = tm.iter_n_children(None)
-            lastiter = tm.iter_nth_child (None, numnodes - 1)
-            if lastiter is None:
-                return
-            self.liststore.swap(l_iter, lastiter)
-            return
+            if iter_next is not None:
+                self.liststore.swap(l_iter, iter_next)
+        elif widget.get_label() == _("Move to Bottom"):
+            self.liststore.move_before(l_iter, None)
 
     def add_engine(self, widget, data=None):
         dialog = Gtk.FileChooserDialog(
