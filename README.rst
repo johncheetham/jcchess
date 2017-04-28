@@ -10,9 +10,13 @@ python3 python-cairo python-gobject
 
 Package names to install.
 
+================== = ==============================
+distro             : packages
+================== = ==============================
 Debian/Mint/Ubuntu : python3-gi-cairo
 Fedora             : python3-cairo, python3-gobject
 Arch               : python-cairo, python-gobject
+================== = ==============================
 
 Usage
 -----
