@@ -6,7 +6,13 @@ JCchess is a program to play chess against UCI chess engines.
 
 Requirements
 ------------
-python3 python-cairo python-gobject gtk3
+python3 python-cairo python-gobject
+
+Package names to install.
+
+Debian/Mint/Ubuntu : python3-gi-cairo
+Fedora             : python3-cairo, python3-gobject
+Arch               : python-cairo, python-gobject
 
 Usage
 -----
