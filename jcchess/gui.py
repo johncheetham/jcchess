@@ -157,7 +157,7 @@ class Gui:
             ("SetBoardColours", None, _("_Set Board Colours"), None,
              _("Set Board Colours"), gv.set_board_colours.show_dialog),
             ("SetPieces", None, _("_Set Pieces"), None,
-             _("Set Pieces"), gv.set_board_colours.show_pieces_dialog),
+             _("Set Pieces"), gv.pieces.show_pieces_dialog),
             ("TimeControl", None, _("_Time Control"), None,
              _("Time Control"), gv.tc.time_control),
             # ConfigureEngine1 - this name is used in engine_manager.
@@ -292,6 +292,7 @@ class Gui:
                 <menuitem action="MoveNow"/>
                 <separator/>
                 <menuitem action="SetBoardColours"/>
+                <menuitem action="SetPieces"/>
                 <separator/>
                 <menuitem action="TimeControl"/>
                 <menuitem action="ConfigureEngine1"/>

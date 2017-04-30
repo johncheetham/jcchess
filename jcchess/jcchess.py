@@ -116,10 +116,6 @@ class Game:
         gv.gui = gui.Gui()
 
         gv.pieces = pieces.Pieces()
-        # custom pieceset path
-        if self.settings is not None:
-            gv.pieces.set_custom_pieceset_path(
-                self.settings.custom_pieceset_path)
         gv.pieces.load_pieces(self.prefix)
 
         # uciw is the instance that plays white
@@ -672,7 +668,6 @@ class Game:
         s.version = VERSION
         s.engine_list = gv.engine_manager.get_engine_list()
         s.pieceset = gv.pieces.get_pieceset()
-        s.custom_pieceset_path = gv.pieces.get_custom_pieceset_path()
         s.player_white = self.player[WHITE]
         s.player_black = self.player[BLACK]
         s.clock_settings = gv.tc.get_clock_settings()
@@ -734,7 +729,7 @@ class Game:
                 if gv.verbose:
                     print (e, ". date not restored")
 
-            # pieceset "eastern", "western" or "custom"
+            # pieceset
             try:
                 gv.pieces.set_pieceset(x.pieceset)
             except Exception as e:

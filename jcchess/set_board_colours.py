@@ -62,9 +62,6 @@ class Set_Board_Colours:
         )
         return square_colours[self.colour_scheme]
 
-    def show_pieces_dialog(self):
-        pass
-
     def set_border_colour(self, cr, a): 
            image = self.wood1
            cr.set_source_surface(image, 0, 0)
