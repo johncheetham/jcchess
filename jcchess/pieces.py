@@ -19,7 +19,7 @@
 
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import GdkPixbuf
+from gi.repository import Rsvg
 import os
 import traceback
 import chess
@@ -29,85 +29,61 @@ from . import gv
 class Pieces:
 
     def __init__(self):
-        self.pieceset = 0
-        # create pixbuf for empty square
-        self.pb_empty = GdkPixbuf.Pixbuf.new(
-            GdkPixbuf.Colorspace.RGB, True, 8, 64, 64)
-        self.pb_empty.fill(0xffffff00)  # fill with transparent white
+        self.pieceset = 1
 
     # called from jcchess.py
     def load_pieces(self, prefix):
         path = os.path.join(prefix, "images", "jcchess")
         p1 = self.load_pieceset(os.path.join(prefix, "images", "pieceset1"))
         p2 = self.load_pieceset(os.path.join(prefix, "images", "pieceset2"))
-        self.jcchess_piece_pixbuf = (p1, p2)
-
-    def load_pieceset(self, pieces_dir):
-        images = ["pawn", "knight", "bishop", "rook", "king", "queen"]
-        piece_pixbuf = []
-        # first pixbuf in list is empty square
-        piece_pixbuf.append(self.pb_empty.copy())
-
-        # get file extension (png or svg)
-        image = images[0] + "B"
-        if os.path.isfile(os.path.join(pieces_dir, image + ".png")):
-            extension = ".png"
-        elif os.path.isfile(os.path.join(pieces_dir, image + ".svg")):
-            extension = ".svg"
-        else:
-            print("Error loading pieces\n\nFile not " \
-                  "found:pawnB.png or pawnB.svg in ",pieces_dir)
-            return None
-
-        # Load pieces
-        for side in ("B", "W"):
-            for image in images:
-                image = image + side+ extension
-                path = os.path.join(pieces_dir, image)
-                if not os.path.isfile(path):
-                    print("Error loading pieces\nFile not found:" \
-                    , image, " in ", pieces_dir)
-                    return None
-                pb = GdkPixbuf.Pixbuf.new_from_file(path)
-                piece_pixbuf.append(pb)
-
-        return piece_pixbuf
+        self.piece_handles = (p1, p2)
 
     """
-    def load_pieceset2(self):
+    def load_pieceset1(self):
         images = [
             "p", "n", "b", "r", "k", "q",
             "P", "N", "B", "R", "K", "Q",
             ]
-        piece_pixbuf = []
-        # first pixbuf in list is empty square
-        piece_pixbuf.append(self.pb_empty.copy())
+        pieces = []
+
         for image in images:
             svg = chess.svg.piece(chess.Piece.from_symbol(image))
-            loader = GdkPixbuf.PixbufLoader()
-            loader.write(svg.encode())
-            loader.close()
-            pb = loader.get_pixbuf()
-            piece_pixbuf.append(pb)
-        return piece_pixbuf
+            svghandle = Rsvg.Handle.new_from_data(svg.encode())
+            pieces.append(svghandle)
+            #loader = GdkPixbuf.PixbufLoader()
+            #loader.write(svg.encode())
+            #loader.close()
+            #pb = loader.get_pixbuf()
+            #piece_pixbuf.append(pb)
+        return pieces
     """
 
-    def getpixbuf(self, piece):
-        #print(piece.color,piece.piece_type)
-        #piece = piece.symbol()
-        #if piece==
+    def load_pieceset(self, pieces_dir):
+        images = ["pawn", "knight", "bishop", "rook", "king", "queen"]
+        pieces = []
+
+        # Load pieces
+        for side in ("B", "W"):
+            for image in images:
+                image = image + side + ".svg"
+                path = os.path.join(pieces_dir, image)
+                svghandle = Rsvg.Handle.new_from_file(path)
+                pieces.append(svghandle)
+
+        return pieces 
+
+    def gethandle(self, piece): 
         # pieces contains the list of possible pieces
         pieces = [
             "None", "p", "n", "b", "r", "k", "q",
                   "P", "N", "B", "R", "K", "Q"]
-
         try:
             idx = pieces.index(piece)
         except ValueError as ve:
             traceback.print_exc()
             print("error piece not found, piece =", piece)
             print(len(piece))
-        return self.jcchess_piece_pixbuf[self.pieceset][idx]
+        return self.piece_handles[self.pieceset][idx-1]
 
     def get_pieceset(self):
         return self.pieceset

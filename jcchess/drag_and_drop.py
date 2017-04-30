@@ -19,10 +19,11 @@
 
 from gi.repository import Gtk
 from gi.repository import GObject
+import cairo
 
 from .constants import TARGET_TYPE_TEXT
 from . import gv
-
+from .board import SCALE
 
 class Drag_And_Drop:
 
@@ -46,52 +47,37 @@ class Drag_And_Drop:
 
         stm = gv.jcchess.get_side_to_move()
 
-        # print "proto=",drag_context.protocol
-        # drag source is a capture square not a board square
-        if widget.get_name() == "bcap_eb" or widget.get_name() == "wcap_eb":
-            self.src_x = x
-            self.src_y = y
-            self.piece = gv.board.get_cap_piece(y, stm)
+        # convert the x, y co-ords into the shogi representation
+        # (e.g. 8, 6 is 1g)
+        sq = gv.board.get_square_posn(x, y)
 
-            self.src = self.piece + "*"
+        self.src = sq
+        if gv.verbose:
+            print("source square: (x, y) = (", x, ",",  y, ") ", sq)
+        self.src_x = x
+        self.src_y = y
 
-            pb = gv.board.get_cap_pixbuf(y, stm)
+        # set the icon for the drag and drop to the piece that is being
+        # dragged
+        self.piece = gv.board.get_piece(x, y)
+        # get width/height of board square
+        a = gv.gui.get_event_box(x, y).get_allocation()
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, a.width, a.height)
+        svghandle = gv.board.get_piece_handle(x, y)
+        dim = svghandle.get_dimensions()
 
-            hot_x = int(pb.get_width() / 2)
-            hot_y = int(pb.get_height() / 2)
-            Gtk.drag_set_icon_pixbuf(drag_context,
-                                     pb,
-                                     hot_x, hot_y)
+        cr = cairo.Context(surface)
+        sfw = (a.width * 1.0 / dim.width) * SCALE
+        sfh = (a.height * 1.0 / dim.height) * SCALE
+        cr.scale(sfw, sfh)
 
-            # clear the square where the piece is being moved from
-            gv.board.set_cap_as_unoccupied(y, self.piece, stm)
-            gv.board.update()
-        else:
+        svghandle.render_cairo(cr)
+        # set mouse pointer to be in middle of drag icon
+        surface.set_device_offset(-a.width/2, -a.height/2)
+        Gtk.drag_set_icon_surface(drag_context, surface)
 
-            # convert the x, y co-ords into the shogi representation
-            # (e.g. 8, 6 is 1g)
-            sq = gv.board.get_square_posn(x, y)
-
-            self.src = sq
-            if gv.verbose:
-                print("source square: (x, y) = (", x, ",",  y, ") ", sq)
-            self.src_x = x
-            self.src_y = y
-
-            # set the icon for the drag and drop to the piece that is being
-            # dragged
-            self.piece = gv.board.get_piece(x, y)
-            pb = gv.board.get_piece_pixbuf(x, y)
-
-            hot_x = int(pb.get_width() / 2)
-            hot_y = int(pb.get_height() / 2)
-
-            Gtk.drag_set_icon_pixbuf(drag_context,
-                                     gv.board.get_piece_pixbuf(x, y),
-                                     hot_x, hot_y)
-
-            # clear the square where the piece is being moved from
-            gv.board.set_square_as_unoccupied(x, y)
+        # clear the square where the piece is being moved from
+        gv.board.set_square_as_unoccupied(x, y)
 
     def sendCallback(self, widget, context, selection, targetType, eventTime):
         if targetType == TARGET_TYPE_TEXT:

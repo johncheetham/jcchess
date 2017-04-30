@@ -22,6 +22,7 @@ from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
+from gi.repository import Rsvg
 import cairo
 import socket
 from datetime import datetime
@@ -32,6 +33,7 @@ from . import gv
 from .constants import WHITE, BLACK
 
 SCALE = 0.9      # scale the pieces so they occupy 90% of the board square
+                 # (Also used in drag_and_drop.py)
 LINEWIDTH = 2    # width of lines on the board
 
 
@@ -100,32 +102,22 @@ class Board:
         for x in range(8):
             for y in range(8):
                 gv.gui.get_event_box(x, y).queue_draw()
-                
+
     #
-    # return a pixbuf of the piece at the given square
+    # get an Rsvg.Handle of the piece at the given square
     # used by drag_and_drop.py to get the drag and drop icon
+    # and by this module to draw pieces on the board
     #
-    def get_piece_pixbuf(self, x, y):
-        # convert the x, y square to the location value used by the engine
+    def get_piece_handle(self, x, y):
         piece = self.get_piece(x, y)
-        pb = gv.pieces.getpixbuf(piece)
-        a = gv.gui.get_event_box(x, y).get_allocation()
-        spb = pb.scale_simple(
-            int(a.width*SCALE), int(a.height*SCALE), GdkPixbuf.InterpType.HYPER)
-        return spb
-
-    def get_piece_pixbuf_unscaled(self, x, y):
-        # convert the x, y square to the location value used by the engine
-        piece = self.get_piece(x, y)
-        pb = gv.pieces.getpixbuf(piece)
-        return pb
+        handle = gv.pieces.gethandle(piece)
+        return handle
 
     #
-    # called from jcchess.py to clear the source square when a drag of
-    # a piece has started
+    # called from drag_and_drop.py to clear the source square when a
+    # drag of a piece has started
     #
     def set_square_as_unoccupied(self, x, y):
-        piece = "None"    # empty square
         self.dnd = (x, y)
         # redraw square
         GLib.idle_add(gv.gui.get_event_box(x, y).queue_draw)
@@ -197,22 +189,22 @@ class Board:
             cr.set_source_rgb(r, g, b)
             cr.rectangle(1, 1 , a.width-LINEWIDTH, a.height-LINEWIDTH)
             cr.fill()
-        
+        if piece == "None":
+            return
         # set offset so piece is centered in the square
         cr.translate(a.width*(1.0-SCALE)/2.0, a.height*(1.0-SCALE)/2.0)
 
         # scale piece so it is smaller than the square
         if self.dnd is not None and self.dnd == (x, y):
-            pb = gv.pieces.getpixbuf("None")
             self.dnd = None
+            return
         else:    
-            pb = self.get_piece_pixbuf_unscaled(x, y)
-        sfw = (a.width * 1.0 / pb.get_width()) * SCALE
-        sfh = (a.height * 1.0 / pb.get_height()) * SCALE
+            svghandle = self.get_piece_handle(x, y) 
+        dim = svghandle.get_dimensions()
+        sfw = (a.width * 1.0 / dim.width) * SCALE
+        sfh = (a.height * 1.0 / dim.height) * SCALE
         cr.scale(sfw, sfh)
-
-        Gdk.cairo_set_source_pixbuf(cr, pb, 0, 0)
-        cr.paint()
+        svghandle.render_cairo(cr)
 
     def get_piece(self, x, y):
         piece = self.chessboard.piece_at(chess.square(x, y))
