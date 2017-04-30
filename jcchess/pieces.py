@@ -23,7 +23,6 @@ from gi.repository import GdkPixbuf
 import os
 import traceback
 import chess
-import chess.svg
 
 from . import gv
 
