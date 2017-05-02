@@ -166,14 +166,14 @@ class Time_Control:
 
         # list of time control types
         combobox = Gtk.ComboBoxText()
-        combobox.append_text("Byoyomi")
+        #combobox.append_text("Byoyomi")
         combobox.append_text("Classical")
         combobox.append_text("Incremental")
         combobox.append_text("Fixed Time Per Move")
         combobox.append_text("Fixed Search Depth")
         combobox.append_text("Infinite Search")
         combobox.append_text("Nodes")
-        combobox.set_active(self.type)
+        combobox.set_active(self.type-1)
 
         al = Gtk.Alignment.new(xalign=0.0, yalign=1.0, xscale=0.0, yscale=0.5)
         # top, bottom, left, right
@@ -539,7 +539,7 @@ class Time_Control:
             # OK pressed - validate input"
             # print "ok pressed"
 
-            self.type = combobox.get_active()
+            self.type = combobox.get_active() + 1
             # byoyomi
             if self.type == 0:
                 byo_hours = int(byo_adj_hours.get_value())
@@ -637,7 +637,7 @@ class Time_Control:
         dialog.destroy()
 
     def tc_method_changed(self, b, dialog):
-        tc_type = b.get_active()
+        tc_type = b.get_active() + 1
 
         self.set_frame_visibility(tc_type)
 
