@@ -17,6 +17,8 @@
 #   along with jcchess.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import gi
+gi.require_version('Rsvg', '2.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
