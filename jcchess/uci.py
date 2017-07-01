@@ -177,14 +177,14 @@ class Uci:
             w = words.pop(0)
             if w != "option":
                 if gv.verbose:
-                    print("invalid option line ignored:", option)
+                    print("invalid option line ignored:", option_line)
                 return
 
             # get option name
             w = words.pop(0)
             if w != "name":
                 if gv.verbose:
-                    print("invalid option line ignored:", option)
+                    print("invalid option line ignored:", option_line)
                 return
             # name can contain spaces
             name = ''
@@ -197,7 +197,7 @@ class Uci:
             # get option type
             if w != "type":
                 if gv.verbose:
-                    print("invalid option line ignored:", option)
+                    print("invalid option line ignored:", option_line)
                 return
             otype = words.pop(0)
 
@@ -217,7 +217,7 @@ class Uci:
                     userval = w2
                 else:
                     if gv.verbose:
-                        print("error parsing option:", option)
+                        print("error parsing option:", option_line)
         except IndexError:
             pass
         userval = self.uservalues.get(name, default)
@@ -655,6 +655,7 @@ class Uci:
         self.command("uci\n")
 
         # wait for reply
+        self.uservalues=gv.engine_manager.get_uservalues(self.engine)
         self.uci_option = []
         uci_ok = False
         i = 0
@@ -669,8 +670,9 @@ class Uci:
                         for j in w:
                             name = name + j + " "
                         name = name.strip()
+                elif l.startswith("option"):        
                     self.uci_option.append(self.option_parse(l))
-                if l == "uciok":
+                elif l == "uciok":
                     uci_ok = True
             self.op = []
             if uci_ok:

@@ -407,7 +407,7 @@ class Engine_Manager:
         for (ename, path, ucioptions) in self.engine_list:
             if ename == engine_name:
                 return ucioptions
-        return None
+        return {}
 
     def set_uservalues(self, engine_name, options):
         i = 0
