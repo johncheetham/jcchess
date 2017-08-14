@@ -1,6 +1,11 @@
-Instructions for installing jcchess on windows.
-I tried this on windows 7 64 bit.
+If you just want to install jcchess on windows there are downloads available
+on the web page.
 
+These instructions are for developers.
+
+If you want to create the installer see the 'create_pynsist_pkgs' script.
+
+For installing manually you can follow these steps.
 
  1. Install python 3.4
 
