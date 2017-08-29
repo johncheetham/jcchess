@@ -19,9 +19,11 @@
 
 from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.repository import GObject
 import os
 
 from . import uci
+from . import utils
 from .constants import WHITE, BLACK
 from . import gv
 
@@ -34,6 +36,8 @@ class Engine_Manager:
         self.glade_file = None
         self.hash_value = 256
         self.ponder = False
+        # bundled engines directory
+        self.bedir = os.path.join(os.path.dirname(utils.get_prefix()), "engines")
 
     def common_settings(self, b):
 
@@ -146,6 +150,7 @@ class Engine_Manager:
         hb.pack_start(fr, True, True, 10)
 
         # right side buttons
+        treeview.connect("button-press-event", self.engine_changed)
         bb = Gtk.VButtonBox()
         bb.set_layout(Gtk.ButtonBoxStyle.START)
         bb.show()
@@ -160,14 +165,14 @@ class Engine_Manager:
         add_button.connect("clicked", self.add_engine, "add engine")
 
         self.delete_button = Gtk.Button(_("Delete"))
-        #self.delete_button.set_sensitive(False)
+        self.delete_button.set_sensitive(False)
         self.delete_button.show()
         bb.add(self.delete_button)
         self.delete_button.connect("clicked",
                                    self.delete_engine, "delete engine")
 
         self.rename_button = Gtk.Button(_("Rename"))
-        #self.rename_button.set_sensitive(False)
+        self.rename_button.set_sensitive(False)
         self.rename_button.show()
         bb.add(self.rename_button)
         self.rename_button.connect("clicked",
@@ -201,6 +206,19 @@ class Engine_Manager:
                 l_iter = tm.iter_next(l_iter)
             self.set_engine_list(elist)
         dialog.destroy()
+
+    def engine_changed(self, widget, event):
+        GObject.idle_add(self.engine_changed2)
+
+    def engine_changed2(self):
+        name, path = self.get_selected_engine()
+        # don't allow rename/delete of bundled engines
+        if os.path.normpath(self.bedir) in os.path.normpath(path):
+            self.delete_button.set_sensitive(False)
+            self.rename_button.set_sensitive(False)
+        else:
+            self.delete_button.set_sensitive(True)
+            self.rename_button.set_sensitive(True)
 
     def get_selected_engine(self):
         ts = self.treeview.get_selection()

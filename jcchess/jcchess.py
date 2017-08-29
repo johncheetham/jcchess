@@ -31,6 +31,7 @@ from gi.repository import GLib
 import _thread
 import traceback
 import os
+import platform
 import sys
 import pickle
 import time
@@ -703,7 +704,31 @@ class Game:
     # restore users settings at program start-up
     #
     def restore_settings(self, x):
+        bepath = None
+        if os.name == 'nt':
+            # get bundled engine if present
+            arch = platform.architecture()[0][0:2]
+            bepath = os.path.join(os.path.dirname(self.prefix), "engines", "stockfish_8_x" + arch + ".exe")
+            be = ["Stockfish 8 " + arch, bepath, {}]
+
+        # if no settings (first run) add bundled engine and
+        # set black player to the engine
+        if x is None:
+            if os.path.isfile(bepath):
+                gv.engine_manager.set_engine_list([be])
+                self.player[BLACK] = be[0]
+            return    
+            
         if x:
+
+            # set the engine or human for each player
+            try:
+                self.player[WHITE] = x.player_white
+                self.player[BLACK] = x.player_black
+            except Exception as e:
+                if gv.verbose:
+                    print(e, ". player setting not restored")
+
             # engine list
             try:
                 if x.engine_list:
@@ -716,6 +741,20 @@ class Game:
                             newe = [olde[0], olde[1], {}]
                             new_engine_list.append(newe)
                         x.engine_list = new_engine_list
+                # if bundled engine add it to the list
+                # if it is not already there
+                if os.path.isfile(bepath):
+                    found = False
+                    for e in x.engine_list:
+                        if e[0] == be[0]:
+                            found = True
+                            break
+                    if not found:
+                        # if no engines there already set black
+                        # player to newly added bundled engine
+                        if not x.engine_list:
+                            self.player[BLACK] = be[0]
+                        x.engine_list.insert(0, be)
                 gv.engine_manager.set_engine_list(x.engine_list)
             except Exception as e:
                 if gv.verbose:
@@ -735,14 +774,6 @@ class Game:
             except Exception as e:
                 if gv.verbose:
                     print(e, ". pieceset setting not restored")
-
-            # set the engine or human for each player
-            try:
-                self.player[WHITE] = x.player_white
-                self.player[BLACK] = x.player_black
-            except Exception as e:
-                if gv.verbose:
-                    print(e, ". player setting not restored")
 
             # time controls
             try:
