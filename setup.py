@@ -56,7 +56,7 @@ setup(name="jcchess",
       license="GPLv3+",
       zip_safe=False,
 
-      packages=["jcchess"],
+      packages=["jcchess", "chess"],
       package_data={
           "jcchess": package_data_list,
       },

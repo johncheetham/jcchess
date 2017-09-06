@@ -21,6 +21,10 @@ Arch               : python-cairo, python-gobject
 Usage
 -----
 Enter 'python3 run.py' to start the program.
+Alternatively you can install it on your system with 'python3 setup.py install'
+(as root user) and then start it from the gui menu or by entering 'jcchess' into
+a terminal.
+Windows versions are available on the website.
 
 Adding a UCI engine
 -------------------

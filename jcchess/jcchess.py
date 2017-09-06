@@ -711,13 +711,13 @@ class Game:
             bepath = os.path.join(os.path.dirname(self.prefix), "engines", "stockfish_8_x" + arch + ".exe")
             be = ["Stockfish 8 " + arch, bepath, {}]
 
-        # if no settings (first run) add bundled engine and
-        # set black player to the engine
-        if x is None:
-            if os.path.isfile(bepath):
-                gv.engine_manager.set_engine_list([be])
-                self.player[BLACK] = be[0]
-            return    
+            # if no settings (first run) add bundled engine and
+            # set black player to the engine
+            if x is None:
+                if os.path.isfile(bepath):
+                    gv.engine_manager.set_engine_list([be])
+                    self.player[BLACK] = be[0]
+                return    
             
         if x:
 
@@ -743,7 +743,7 @@ class Game:
                         x.engine_list = new_engine_list
                 # if bundled engine add it to the list
                 # if it is not already there
-                if os.path.isfile(bepath):
+                if bepath is not None and os.path.isfile(bepath):
                     found = False
                     for e in x.engine_list:
                         if e[0] == be[0]:
