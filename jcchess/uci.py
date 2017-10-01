@@ -154,7 +154,7 @@ class Uci:
             self.command("setoption name " + name + " value " + value + "\n")
             
         # Ask if ready
-        # slight delay before ending this (for gnuchess)
+        # slight delay before sending this (for gnuchess)
         time.sleep(0.25)
         self.command("isready\n")
 
@@ -239,7 +239,7 @@ class Uci:
                 else:
                     if gv.verbose:
                         print("error parsing option:", option_line)
-                        return None
+                    return None
         except IndexError:
             pass
         userval = self.uservalues.get(name, default)
