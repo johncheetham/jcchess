@@ -696,6 +696,7 @@ class Uci:
                     if w[1] == "name":
                         w.pop(0)
                         w.pop(0)
+                        name = ""
                         for j in w:
                             name = name + j + " "
                         name = name.strip()
