@@ -164,7 +164,7 @@ class Load_Save:
 
         gv.jcchess.set_movelist(movelist)
         gv.jcchess.set_redolist(redolist)
-        gv.jcchess.set_startpos(startpos)
+        gv.jcchess.set_startpos(fen)
         gv.jcchess.set_lastmove(lastmove)
 
         gv.board.update()
