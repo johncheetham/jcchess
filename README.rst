@@ -1,4 +1,6 @@
 JCchess - John Cheetham - http://www.johncheetham.com/projects/jcchess
+
+**NOTE: This project is no longer developed and has been archived.**
  
 Description
 -----------
